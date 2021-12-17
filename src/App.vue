@@ -1,7 +1,5 @@
 <template>
 
-  <Navbar></Navbar>
-
 <router-view />
 </template>
 
@@ -17,6 +15,9 @@ import Navbar from '@/components/Navbar.vue'
 export default {
   components: {
     Navbar
+  },
+  mounted(){
+    window.app = this;
   }
 }
 </script>

@@ -1,14 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Roboto+Mono&display=swap');
 
-*{
-  margin: 0px;
-  padding: 0px;
+* {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 }
 
-.v-center{
-  &.h100{
+body {
+  height: 100vh;
+}
+
+#app {
+  height: 100%;
+}
+
+.v-center {
+  &.h100 {
     height: 100%;
   }
   display: flex;
@@ -16,6 +24,128 @@
   justify-content: center;
 }
 
-.flex{
+.flex {
   display: flex;
+}
+
+.thick-icon {
+  --ionicon-stroke-width: 48px;
+}
+
+.preShow {
+  opacity: 0;
+}
+
+.tooltip {
+  position: fixed;
+  display: inline-block;
+  padding: 5px 12px;
+  text-align: center;
+  background-color: #151538;
+  filter: drop-shadow(0px 0px 4px rgba(21, 21, 56, 0.25));
+  border-radius: 3px;
+  color: #F8F8FA;
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+
+  .arrow.up {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #151538;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%,calc(-100% + 1px));
+  }
+}
+
+.loadingFill {
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  background-color: #F8F8FA;
+}
+
+.loadingFill::before {
+  content: '';
+  display: block;
+  position: absolute;
+  left: -150px;
+  top: 0;
+  height: 100%;
+  width: 150px;
+  background: linear-gradient(to right, transparent 0%, #f2f2f2 50%, transparent 100%);
+  animation: load 1.3s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+}
+@keyframes load {
+  from {
+    left: -150px;
+  }
+
+  to {
+    left: 100%;
+  }
+}
+
+.btn {
+  font-size: 14px;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-primary {
+  background-color: #005FFE;
+  color: #fff;
+  transition: filter 0.2s;
+
+  &:hover {
+    filter: drop-shadow(0px 0px 5px rgba(0, 95, 254, 0.25));
+  }
+}
+
+.btn-grey {
+  background-color: #fff;
+  color: #5F6266;
+  border: 2px solid #ECEBED;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #ddd;
+  }
+}
+
+.emoji {
+  height: 1em;
+  display: inline;
+}
+
+.inline-loader {
+  height: 1em;
+  animation: loadSpin 1s infinite;
+  animation-timing-function: linear;
+  margin: 0 5px;
+}
+@keyframes loadSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.betterIcon {
+  position: relative;
+  top: 1.5px;
+}
+
+.color-danger,
+h1.color-danger {
+  color: #EC4747;
 }

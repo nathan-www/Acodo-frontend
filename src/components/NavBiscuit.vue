@@ -75,9 +75,12 @@ export default {
     padding: 10px 0px;
 
     .dropdown-item {
+
+        margin: 0px 10px;
         padding: 10px 15px;
         width: 400px;
-        transition: background-color 0.2s;
+        transition: background-color 0.3s;
+        border-radius: 6px;
 
         &:hover{
           background-color: #f8f8fa;
