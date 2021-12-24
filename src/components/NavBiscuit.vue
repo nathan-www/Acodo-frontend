@@ -73,6 +73,7 @@ export default {
     left: 0;
     transform: translateY(100%);
     padding: 10px 0px;
+    z-index: 20;
 
     .dropdown-item {
 

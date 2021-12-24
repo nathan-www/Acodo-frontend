@@ -15,6 +15,11 @@ const routes = [
     path: '/courses/:course_slug/:chapter_slug/:level_slug',
     name: 'Level',
     component: () => import('../views/Level.vue')
+  },
+  {
+    path: '/:path(.*)*',
+    name: 'NotFound',
+    component: () => import('../views/404.vue')
   }
 ]
 

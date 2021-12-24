@@ -41,78 +41,85 @@
 
     <div class="sidebar-inner challenge" v-if="sidebarTab == 'challenge'">
 
-      <div class="sidebar-breadcrumb">
-        <a>Python</a>
-        <ion-icon name="chevron-forward"></ion-icon><a>Object-Oriented Programming</a>
+      <div v-if="level == null">
+        <div class="loadingFill" style="width: 100%; height: 40px; background-color: #eee;"></div>
+        <div class="loadingFill" style="width: 100%; height: 100px; background-color: #eee; margin-top: 20px"></div>
+        <div class="loadingFill" style="width: 100%; height: 70px; background-color: #eee; margin-top: 10px"></div>
+        <div class="loadingFill" style="width: 100%; height: 120px; background-color: #eee; margin-top: 10px"></div>
+        <div class="loadingFill" style="width: 100%; height: 50px; background-color: #eee; margin-top: 10px"></div>
       </div>
-
-      <div class="flex">
-        <div class="v-center">
-          <h2>Constructors &amp; Attributes</h2>
+      <div v-else>
+        <div class="sidebar-breadcrumb">
+          <a @click="$router.push('/courses/'+course.course_slug)">{{ course.course_title }}</a>
+          <ion-icon name="chevron-forward"></ion-icon><a @click="$router.push('/courses/'+course.course_slug+'/'+chapter_slug)">{{ course.chapters[chapter_slug].chapter_title }}</a>
         </div>
-        <div class="v-center">
-          <span class="difficulty-badge easy">Easy</span>
-        </div>
-      </div>
 
-      <div class="separator"></div>
-
-      <p>Python is an object oriented programming language.</p>
-      <p>Almost everything in Python is an object, with its properties and methods.</p>
-      <p>A Class is like an object constructor, or a "blueprint" for creating objects.</p>
-
-      <h3>Example</h3>
-
-      <p>Create a class named MyClass, with a property named x:</p>
-
-      <div>
-        <div class="code-block">
-          class MyClass:<br />
-          &nbsp;&nbsp;&nbsp;x = 5
-        </div>
-      </div>
-
-      <div class="separator"></div>
-      <div class="separator"></div>
-
-      <h3>
-        <ion-icon name="hammer"></ion-icon> Task
-      </h3>
-
-      <p>Create a class <span class="inline-code">Person</span> with the attributes ‘firstname’ and ‘lastname’.</p>
-      <p>Define a method <span class="inline-code">printname</span> that prints the firstname and lastname.</p>
-
-      <div class="test-area">
-        <h3>Code tests</h3>
-
-        <div class="test flex">
+        <div class="flex">
           <div class="v-center">
-            <div class="test-icon v-center pass">
-              <ion-icon name="checkmark"></ion-icon>
-            </div>
+            <h2>{{ level.level_title }}</h2>
           </div>
           <div class="v-center">
-            <div>
-              <h4>Class ‘Person’ must contain the property ‘firstname’</h4>
-            </div>
+            <span :class="'difficulty-badge ' + level.difficulty.toLowerCase()">{{level.difficulty}}</span>
           </div>
         </div>
 
-        <div class="test flex">
-          <div class="v-center">
-            <div class="test-icon v-center fail">
-              <ion-icon name="close"></ion-icon>
-            </div>
-          </div>
-          <div class="v-center">
-            <div>
-              <h4>Code must contain an IF statement</h4>
-            </div>
+        <div class="separator"></div>
+
+        <div class="brief" v-html="brief"></div>
+
+        <h3>Example</h3>
+
+        <p>Create a class named MyClass, with a property named x:</p>
+
+        <div>
+          <div class="code-block">
+            class MyClass:<br />
+            &nbsp;&nbsp;&nbsp;x = 5
           </div>
         </div>
 
-      </div>
+        <div class="separator"></div>
+        <div class="separator"></div>
 
+        <h3>
+          <ion-icon name="hammer"></ion-icon> Task
+        </h3>
+
+        <p>Create a class <span class="inline-code">Person</span> with the attributes ‘firstname’ and ‘lastname’.</p>
+        <p>Define a method <span class="inline-code">printname</span> that prints the firstname and lastname.</p>
+
+        <div class="test-area">
+          <h3>Code tests</h3>
+
+          <div class="test flex">
+            <div class="v-center">
+              <div class="test-icon v-center pass">
+                <ion-icon name="checkmark"></ion-icon>
+              </div>
+            </div>
+            <div class="v-center">
+              <div>
+                <h4>Class ‘Person’ must contain the property ‘firstname’</h4>
+              </div>
+            </div>
+          </div>
+
+          <div class="test flex">
+            <div class="v-center">
+              <div class="test-icon v-center fail">
+                <ion-icon name="close"></ion-icon>
+              </div>
+            </div>
+            <div class="v-center">
+              <div>
+                <h4>Code must contain an IF statement</h4>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
     </div>
 
     <div class="footer" v-if="sidebarTab == 'challenge'">
@@ -409,19 +416,19 @@
 
           <div class="code-block">
             function knights(ranks, p, r) {
-  <br />const l = ranks.length;
-  <br />let [x, a, b, c] = [0, (p-1+l)%l, p%l, 1];
-  <br />while (c) {
-  <br />  c = 0;
-  <br />  while (ranks[a] == r) {
-  <br />    [a, x, c] = [(a-1+l)%l, x+1, c+1];
-  <br />    if (a == b) return 1 + (c + r != ranks[a] && r != ranks[a]);
-  <br />  } while (ranks[b] == r) {
-  <br />    [b, x, c] = [(b+1)%l, x+1, c+1];
-  <br />    if (a == b) return 1 + (c + r != ranks[a] && r != ranks[a]);
-  <br />  } r += c;
-  <br />} return l - x + 1;
-}
+            <br />const l = ranks.length;
+            <br />let [x, a, b, c] = [0, (p-1+l)%l, p%l, 1];
+            <br />while (c) {
+            <br /> c = 0;
+            <br /> while (ranks[a] == r) {
+            <br /> [a, x, c] = [(a-1+l)%l, x+1, c+1];
+            <br /> if (a == b) return 1 + (c + r != ranks[a] && r != ranks[a]);
+            <br /> } while (ranks[b] == r) {
+            <br /> [b, x, c] = [(b+1)%l, x+1, c+1];
+            <br /> if (a == b) return 1 + (c + r != ranks[a] && r != ranks[a]);
+            <br /> } r += c;
+            <br />} return l - x + 1;
+            }
           </div>
 
           <div class="badges flex">
@@ -444,47 +451,287 @@
   </div>
 
 
-  <div class="code-area">
+  <div class="work-area">
 
+    <div class="code-area">
+
+      <div class="code-tool-bar flex">
+        <div class="tool reload-button v-center" data-tooltip="Load default code">
+          <ion-icon name="refresh"></ion-icon>
+        </div>
+        <div class="tool copy-button v-center" data-tooltip="Copy code">
+          <ion-icon name="copy-outline"></ion-icon>
+        </div>
+        <div class="tool save-button v-center" data-tooltip="Save draft">
+          <ion-icon name="save-outline"></ion-icon>
+        </div>
+
+        <div class="code-tool-bar-right flex">
+          <div class="btn btn-primary-light" data-tooltip="⌘R, Ctrl+R" @click="runCode()">
+            <ion-icon name="play-outline" class="betterIcon"></ion-icon> Run
+          </div>
+          <div class="btn btn-primary">
+            Submit solution
+          </div>
+        </div>
+      </div>
+
+      <div class="code-editor-container">
+        <Codemirror v-model:value="code" :options="cmOptions" placeholder="test placeholder" />
+      </div>
+
+    </div>
+
+
+    <PythonEmulator ref="PythonEmulator"></PythonEmulator>
 
   </div>
 
 </div>
 </template>
 
+
 <script>
 import Navbar from '@/components/Navbar.vue'
 import NavBiscuit from '@/components/NavBiscuit.vue'
+
+import PythonEmulator from '@/emulators/python.vue';
+
+import Codemirror from "codemirror-editor-vue3";
+import "codemirror/mode/python/python.js";
+import "@/style/cmtheme.css";
+
+import {
+  MarkdownCoverter
+} from '@/utility/MarkdownCoverter'
 
 export default {
   name: 'Level',
   components: {
     Navbar,
-    NavBiscuit
+    NavBiscuit,
+    Codemirror,
+    PythonEmulator
   },
   data() {
     return {
-      "sidebarTab": "challenge",
-      console: console
+      code: "",
+      sidebarTab: "challenge",
+      cmOptions: {
+        mode: "python",
+        theme: "acodo",
+        lineNumbers: true,
+        smartIndent: true,
+        indentUnit: 2,
+        foldGutter: true,
+        styleActiveLine: true,
+      },
+      course_slug: this.$route.params.course_slug,
+      chapter_slug: this.$route.params.chapter_slug,
+      level_slug: this.$route.params.level_slug,
     }
+  },
+  watch: {
+    level: function(level) {
+      if (level.hasOwnProperty('exists') && !level.exists) {
+        this.$router.push('/404');
+      }
+    }
+  },
+  computed: {
+    level() {
+      return this.$store.getters.getLevel(this.course_slug, this.chapter_slug, this.level_slug);
+    },
+    course() {
+      return this.$store.getters.getCourse(this.course_slug);
+    },
+    brief() {
+      return MarkdownCoverter(this.code);
+    }
+  },
+  methods: {
+    runCode() {
+      this.$refs.PythonEmulator.runCode(this.code);
+    }
+  },
+  mounted() {
+
+    this.$store.dispatch('getLevel', {
+      'course_slug': this.course_slug,
+      'chapter_slug': this.chapter_slug,
+      'level_slug': this.level_slug
+    });
+
   }
 }
 </script>
 
+<style lang="scss">
+.brief {
+
+    .horizotal-rule{
+      width: 100%;
+      border-top: 1px solid #ECEBED;
+      margin: 12px 0px;
+    }
+
+    a{
+      color: #005FFE;
+    }
+
+    h2 {
+        color: #151538;
+        font-size: 18px;
+    }
+
+    h3 {
+        color: #151538;
+        font-size: 15px;
+        margin-bottom: 5px;
+        margin-top: 15px;
+    }
+
+    p {
+        color: #5F6266;
+        font-size: 13px;
+        line-height: 1.5em;
+        margin-bottom: 6px;
+    }
+
+    .code-block {
+        font-family: 'Source Code Pro', monospace;
+        font-size: 14px;
+        color: #5C616B;
+        background: linear-gradient(0deg, rgba(0, 95, 254, 0.07), rgba(0, 95, 254, 0.07)), #FFFFFF;
+        border: 1px solid rgba(0, 95, 254, 0.17);
+        padding: 7px;
+        display: inline-block;
+        border-radius: 5px;
+
+        white-space: nowrap;
+        overflow: scroll;
+    }
+
+    .inline-code {
+        font-family: 'Source Code Pro', monospace;
+        font-size: 14px;
+        color: #5C616B;
+        background: linear-gradient(0deg, rgba(0, 95, 254, 0.07), rgba(0, 95, 254, 0.07)), #FFFFFF;
+        border: 1px solid rgba(0, 95, 254, 0.17);
+        padding: 1px 5px;
+        border-radius: 5px;
+    }
+
+}
+</style>
+
 <style lang="scss" scoped>
+h2 {
+    color: #151538;
+    font-size: 18px;
+}
+
+h3 {
+    color: #151538;
+    font-size: 15px;
+    margin-bottom: 5px;
+    margin-top: 15px;
+}
+
+p {
+    color: #5F6266;
+    font-size: 13px;
+    line-height: 1.5em;
+    margin-bottom: 6px;
+}
+
+.code-block {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    color: #5C616B;
+    background: linear-gradient(0deg, rgba(0, 95, 254, 0.07), rgba(0, 95, 254, 0.07)), #FFFFFF;
+    border: 1px solid rgba(0, 95, 254, 0.17);
+    padding: 7px;
+    display: inline-block;
+    border-radius: 5px;
+
+    white-space: nowrap;
+    overflow: scroll;
+}
+
+.inline-code {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    color: #5C616B;
+    background: linear-gradient(0deg, rgba(0, 95, 254, 0.07), rgba(0, 95, 254, 0.07)), #FFFFFF;
+    border: 1px solid rgba(0, 95, 254, 0.17);
+    padding: 1px 5px;
+    border-radius: 5px;
+}
 
 .main {
     height: calc(100% - 66px);
+    overflow: hidden;
+}
+
+.code-area {
+
+    height: 50%;
+    border-bottom: 1px solid #E5E9F7;
+
+    .code-editor-container {
+        padding: 5px 0;
+        font-family: 'Source Code Pro', monospace;
+        height: calc(100% - 51px);
+    }
+
+    .code-tool-bar {
+
+        .tool {
+            margin-right: 5px;
+            font-size: 20px;
+            color: #A0A1A7;
+            cursor: pointer;
+
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 4px;
+            width: 33.5px;
+            text-align: center;
+
+            ion-icon {
+                margin: auto;
+            }
+
+            &:hover {
+                background-color: #ECEBED;
+            }
+
+        }
+
+        padding: 8px 25px 8px 10px;
+        border-bottom: 1px solid #ECEBED;
+
+        .code-tool-bar-right {
+            margin-left: auto;
+        }
+        .btn {
+            margin-right: 10px;
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+    }
 }
 
 .sidebar {
     width: 450px;
     height: 100%;
-    border-right: 1.5px solid #ECEBED;
+    border-right: 1px solid #ECEBED;
 }
 
 .sidebar-tabs {
-    padding: 10px 25px;
+    padding: 11.25px 25px;
     border-bottom: 1px solid #ECEBED;
     user-select: none;
     background-color: #F8F8FA;
@@ -520,49 +767,6 @@ export default {
     }
 }
 
-h2 {
-    color: #151538;
-    font-size: 18px;
-}
-
-h3 {
-    color: #151538;
-    font-size: 15px;
-    margin-bottom: 5px;
-    margin-top: 15px;
-}
-
-p {
-    color: #5F6266;
-    font-size: 13px;
-    line-height: 1.5em;
-    margin-bottom: 6px;
-}
-
-.code-block {
-    font-family: Roboto Mono;
-    font-size: 14px;
-    color: #5C616B;
-    background: linear-gradient(0deg, rgba(0, 95, 254, 0.07), rgba(0, 95, 254, 0.07)), #FFFFFF;
-    border: 1px solid rgba(0, 95, 254, 0.17);
-    padding: 7px;
-    display: inline-block;
-    border-radius: 5px;
-
-    white-space: nowrap;
-    overflow: scroll;
-}
-
-.inline-code {
-    font-family: Roboto Mono;
-    font-size: 14px;
-    color: #5C616B;
-    background: linear-gradient(0deg, rgba(0, 95, 254, 0.07), rgba(0, 95, 254, 0.07)), #FFFFFF;
-    border: 1px solid rgba(0, 95, 254, 0.17);
-    padding: 1px 5px;
-    border-radius: 5px;
-}
-
 .separator {
     margin-bottom: 15px;
     height: 1px;
@@ -581,6 +785,17 @@ p {
         color: #6FCF97;
         background: rgba(111, 207, 151, 0.17);
     }
+
+    &.medium {
+        color: #F2C94C;
+        background: rgba(242, 201, 76, 0.17);
+    }
+
+    &.hard {
+        color: #EC4747;
+        background: rgba(236, 71, 71, 0.17);
+    }
+
 }
 
 .sidebar-inner {
@@ -708,7 +923,7 @@ p {
     }
 }
 
-.code-area {
+.work-area {
     width: calc(100% - 450px);
 }
 
@@ -963,49 +1178,49 @@ p {
         user-select: none;
     }
 
-    .badge{
-      background-color: #EDEDED;
-      padding: 2px 9px 3px 9px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.2s;
+    .badge {
+        background-color: #EDEDED;
+        padding: 2px 9px 3px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
 
-      margin-top: 5px;
+        margin-top: 5px;
 
-      &:hover{
-        background-color: #E5E5E5;
-      }
+        &:hover {
+            background-color: #E5E5E5;
+        }
 
-      .badge-icon{
-        margin-right: 5px;
-      }
+        .badge-icon {
+            margin-right: 5px;
+        }
 
-      .badge-text{
-        color: #5F6266;
-        font-size: 12px;
-        margin-right: 5px;
-      }
-      .badge-count{
-        color: #A0A1A7;
-        font-size: 12px;
-        font-weight: 500;
-      }
+        .badge-text {
+            color: #5F6266;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .badge-count {
+            color: #A0A1A7;
+            font-size: 12px;
+            font-weight: 500;
+        }
     }
 
-    .solution-right{
-      width: calc(100% - 55px);
-      margin-left: 15px;
+    .solution-right {
+        width: calc(100% - 55px);
+        margin-left: 15px;
 
-      .code-block{
-        margin-top: 7px;
-        width: 100%;
-        font-size: 13px;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-        &::-webkit-scrollbar {
-          display: none;
+        .code-block {
+            margin-top: 7px;
+            width: 100%;
+            font-size: 13px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            &::-webkit-scrollbar {
+                display: none;
+            }
         }
-      }
     }
 
 }

@@ -10,15 +10,15 @@
       <div class="v-center logo-text">Acodo</div>
     </div>
 
-    <div class="nav-link v-center">
+    <div @click="$router.push('/library')" :class="'nav-link v-center ' + ((getPath()=='/library')?'active':'')">
       Library
     </div>
 
-    <div class="nav-link active v-center">
+    <div @click="$router.push('/my-courses')" :class="'nav-link v-center ' + ((getPath()=='/my-courses')?'active':'')">
       My courses
     </div>
 
-    <div class="nav-link v-center">
+    <div @click="$router.push('/leaderboards')" :class="'nav-link v-center ' + ((getPath()=='/leaderboards')?'active':'')">
       Leaderboards
     </div>
 
@@ -76,15 +76,15 @@
 
       <div class="account-info">
         <div class="v-center h100">
-          <h2 class="username">chrisdoe</h2>
+          <h2 class="username">{{account.username}}</h2>
           <p class="xp">
-            <ion-icon name="sparkles"></ion-icon> 14 xp
+            <ion-icon name="sparkles"></ion-icon> {{account.xp}} xp
           </p>
         </div>
       </div>
 
       <div class="account-icon v-center">
-        <img src="https://robohash.org/fsjdkflskdf.png" alt="">
+        <img :src="'https://robohash.org/'+MD5(account.username)+'.png'" alt="">
       </div>
 
       <div class="account-dropdown" v-if="showAccountDropdown">
@@ -92,11 +92,11 @@
 
           <div class="flex">
 
-            <img class="dropdown-profile-pic" src="https://robohash.org/fsjdkflskdf.png" alt="">
+            <img class="dropdown-profile-pic" :src="'https://robohash.org/'+MD5(account.username)+'.png'" alt="">
 
             <div>
 
-              <h3>{{account}} <span class="rank-badge">Newbie</span></h3>
+              <h3>{{account.username}} <span class="rank-badge">Newbie</span></h3>
 
               <div class="account-dropdown-stats flex">
 
@@ -161,7 +161,7 @@
             </div>
           </div>
 
-          <div class="dropdown-link flex" @click="hello()">
+          <div class="dropdown-link flex">
             <div class="icon v-center">
               <ion-icon name="cog"></ion-icon>
             </div>
@@ -194,6 +194,7 @@
 
 <script>
 import NavBiscuit from './NavBiscuit.vue'
+import { MD5 } from '@/utility/MD5'
 
 export default {
   name: 'Navbar',
@@ -217,10 +218,14 @@ export default {
     }
   },
   methods: {
-
+    getPath() {
+      return location.pathname;
+    },
+    MD5(txt) {
+      return MD5(txt);
+    }
   },
   mounted() {
-    window.app = this;
     this.$store.dispatch('getAccount')
   }
 }
@@ -316,6 +321,7 @@ export default {
     margin-bottom: 10px;
     padding: 6px 10px;
     position: relative;
+    z-index: 9;
 
     transition: background-color 0.3s;
     border-radius: 6px;
@@ -493,6 +499,7 @@ export default {
     box-shadow: 0 0 10px 1px rgba(196, 196, 196, 0.3);
     border-radius: 5px;
     transform: translateY(100%);
+    z-index: 20;
 
     .notification {
 
