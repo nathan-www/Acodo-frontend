@@ -30,19 +30,87 @@ onmessage = function(e) {
     consolePromResolve(e.data.code);
   } else if (e.data.type == "execute") {
 
-    pypyjs.exec(e.data.code).then(() => {
-      postMessage({
-        type: "consoleEnable"
-      });
-    }).catch((err) => {
-      postMessage({
-        type: "consoleError",
-        error: err.trace
-      });
-      postMessage({
-        type: "consoleEnable"
-      });
+    test_feedback = {};
+    e.data.tests.forEach((test) => {
+      test_feedback[test.test_id] = {
+        passed: false,
+        error: false,
+        test_id: test.test_id
+      };
     });
+
+    (async () => {
+
+      await pypyjs.exec('globals().clear()');
+
+      pypyjs.exec(e.data.code).then(() => { //Execute user's code
+
+        postMessage({
+          type: "consoleEnable"
+        });
+
+        pypyjs.exec(e.data.test_code).then(() => { //Execute the test code initialiser
+
+          (async () => {
+
+
+            for (var i = 0; i < e.data.tests.length; i++) { //Loop through each test function and run it
+
+              let test = e.data.tests[i];
+
+              try {
+                res = await pypyjs.eval(test.func + "()");
+                test_feedback[test.test_id].passed = (res == true);
+              } catch (err) {
+
+                test_feedback[test.test_id].error = true; //Test function threw an error
+              }
+            }
+
+            postMessage({ //Return test results
+              type: "test_feedback",
+              feedback: test_feedback,
+              error: false
+            });
+
+
+          })();
+
+        }).catch((err) => { //Initial execution of test code produced an error
+
+          postMessage({
+            type: "test_feedback",
+            feedback: test_feedback,
+            error: true
+          });
+
+          postMessage({
+            type: "consoleError",
+            error: err.trace
+          });
+
+        });
+
+      }).catch((err) => { //Execution of user's code produced an error
+
+
+        postMessage({
+          type: "test_feedback",
+          feedback: test_feedback,
+          error: true
+        });
+
+        postMessage({
+          type: "consoleError",
+          error: err.trace
+        });
+        postMessage({
+          type: "consoleEnable"
+        });
+
+      });
+
+    })();
 
   } else if (e.data.type == "input") {
     inputText = e.data.text;

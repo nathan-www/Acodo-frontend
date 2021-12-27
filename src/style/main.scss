@@ -37,6 +37,23 @@ body {
 }
 
 .tooltip {
+
+  &.tooltip-top{
+    transform: translateX(-50%) translateY(-100%);
+
+    .arrow {
+      bottom: 0;
+      top: null;
+      transform: translate(-50%,calc(100% - 1px)) rotate(180deg);
+    }
+  }
+
+  &:not(.tooltip-top){
+    .arrow {
+      top: 0;
+    }
+  }
+
   position: fixed;
   display: inline-block;
   padding: 5px 12px;
@@ -50,14 +67,13 @@ body {
   transform: translateX(-50%);
   z-index: 100;
 
-  .arrow.up {
+  .arrow {
     width: 0;
     height: 0;
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
     border-bottom: 6px solid #151538;
     position: absolute;
-    top: 0;
     left: 50%;
     transform: translate(-50%,calc(-100% + 1px));
   }
@@ -106,6 +122,16 @@ body {
 
   &:hover {
     filter: drop-shadow(0px 0px 5px rgba(0, 95, 254, 0.25));
+  }
+}
+
+.btn-danger{
+  background-color: #EC4747;
+  color: #fff;
+  transition: filter 0.2s;
+
+  &:hover{
+    filter: drop-shadow(0px 0px 2px #EC4747);
   }
 }
 

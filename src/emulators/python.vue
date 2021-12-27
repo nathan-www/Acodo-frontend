@@ -1,6 +1,6 @@
 <template lang="html">
 
-  <div class="console" id="console">
+  <div class="console" id="console" onclick="document.querySelector('.console-input-box').focus()">
 
     <div class="console-loading v-center" v-if="consoleLoading">
       <img class="inline-loader" src="@/assets/img/loader-grey.png" alt="">
@@ -111,13 +111,17 @@ export default {
 
   methods: {
 
-    runCode: function(code) {
+    runCode: function(obj) {
+
+
 
       appConsole.disable();
       appConsole.executionStamp();
       pypyworker.postMessage({
         "type": "execute",
-        "code": code
+        "code": obj.code,
+        "tests": JSON.parse(JSON.stringify(obj.tests)),
+        "test_code": obj.test_code
       });
 
     }
@@ -137,6 +141,7 @@ export default {
 
     app = this;
     pypyworker.onmessage = (e) => {
+
       if (e.data.type == "consoleEnable") {
         app.consoleLoading = false;
         appConsole.enable();
@@ -144,6 +149,8 @@ export default {
         appConsole.error(e.data.error);
       } else if (e.data.type == "consoleOutput") {
         appConsole.response(e.data.data);
+      } else if(e.data.type == "test_feedback"){
+        app.$parent.receiveTestFeedback(e.data.feedback,e.data.error);
       }
     };
 

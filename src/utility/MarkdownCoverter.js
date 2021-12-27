@@ -15,6 +15,7 @@ export function MarkdownCoverter(markdown) {
     str = str.replaceAll(/__(.+?)__/g, (r) => "<strong>" + r.slice(2, -2) + "</strong>");
     str = str.replaceAll(/\*(.+?)\*/g, (r) => "<i>" + r.slice(1, -1) + "</i>");
     str = str.replaceAll(/_(.+?)_/g, (r) => "<i>" + r.slice(1, -1) + "</i>");
+    str = str.replaceAll(/`(.+?)`/g, (r) => "<span class='inline-code'>" + r.slice(1, -1) + "</span>");
     str = str.replaceAll(/\[(.*?)\]\((.*?)\)/g,(link) => {
       let text = link.match(/\[(.*?)\]/)[1];
       let url = link.match(/\((.*?)\)/)[1];
