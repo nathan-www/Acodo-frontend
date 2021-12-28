@@ -3,7 +3,30 @@
 </template>
 
 <script>
+
 var Quill = require("quill")
+const Clipboard = Quill.import('modules/clipboard')
+const Delta = Quill.import('delta')
+
+/* SOURCE: https://gist.github.com/prodrammer/d4d205594b2993224b8ad111cebe1a13 */
+class PlainClipboard extends Clipboard {
+  onPaste(e) {
+    e.preventDefault()
+    const range = this.quill.getSelection()
+    const text = e.clipboardData.getData('text/plain')
+    const delta = new Delta()
+      .retain(range.index)
+      .delete(range.length)
+      .insert(text)
+    const index = text.length + range.index
+    const length = 0
+    this.quill.updateContents(delta, 'silent')
+    this.quill.setSelection(index, length, 'silent')
+    this.quill.scrollIntoView()
+  }
+}
+
+Quill.register('modules/clipboard', PlainClipboard, true)
 
 export default {
   name: "Quill",
@@ -28,7 +51,7 @@ export default {
 
       let app = this;
 
-      this.editor.on('text-change', function(delta, oldDelta, source) {
+      this.editor.on('editor-change', function(delta, oldDelta, source) {
         app.$parent.send_message_content = app.editor.root.innerHTML;
       });
 

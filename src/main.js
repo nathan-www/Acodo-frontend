@@ -8,6 +8,7 @@ import vClickOutside from "click-outside-vue3"
 
 import { api_request } from '@/utility/ApiRequest'
 import { ConvertTime } from '@/utility/ConvertTime'
+import { Banner, ConfirmDialog } from '@/utility/Popups'
 
 const app = createApp(App);
 
@@ -15,7 +16,9 @@ const app = createApp(App);
 app.mixin({
   methods: {
     api_request: api_request,
-    ConvertTime: ConvertTime
+    ConvertTime: ConvertTime,
+    Banner: Banner,
+    ConfirmDialog: ConfirmDialog
   }
 });
 

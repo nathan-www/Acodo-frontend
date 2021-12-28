@@ -16,7 +16,7 @@
 
   <div class="biscuit-dropdown-area" v-click-outside="function(){ showDropdown=false; }" v-if="showDropdown">
 
-    <div v-for="item in items" :class="'dropdown-item ' + (item.active ? 'active':'')">
+    <div v-for="item in items" :class="'dropdown-item ' + (item.active ? 'active':'')" @click="$router.push(item.link)">
       <div class="flex">
         <div class="v-center">
           <div :class="'dropdown-icon v-center ' + (item.levels_done==item.levels_total ? 'check':'')">
@@ -26,7 +26,7 @@
         <div class="dropdown-info v-center">
           <div>
             <h3>{{item.title}}</h3>
-            <p v-if="item.levels_total > 1">{{item.levels_done}}/{{item.levels_total}} levels complete</p>
+            <p v-if="item.levels_total > 0 && biscuitType !== 'levels'">{{item.levels_done}}/{{item.levels_total}} levels complete</p>
           </div>
         </div>
         <div class="v-center" style="margin-left: auto;">
@@ -49,7 +49,8 @@ export default {
   name: 'NavBiscuit',
   props: {
     title: {},
-    items: {}
+    items: {},
+    biscuitType: {}
   },
   components: { ProgressCircle },
   data(){
@@ -138,6 +139,12 @@ export default {
     transition: box-shadow 0.2s;
     cursor: pointer;
     position: relative;
+
+    margin-right: 15px;
+
+    &:last-child{
+      margin-right: 0px;
+    }
 
     &:hover {
         box-shadow: 0 0 5px 0 #ecebed;

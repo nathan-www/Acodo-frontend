@@ -17,7 +17,14 @@ var MessageHTMLToMarkdown = (html) => {
 
   var he = require('he');
 
-  let message = html.replaceAll("</p>", "\n");
+  function HTMLentities(r) {
+    return r.replace(/[\x26\x0A\<>'"]/g, function(r) {
+      return "&#" + r.charCodeAt(0) + ";"
+    })
+  }
+
+  let message = html.replace(/\uFFFD/g, '');
+  message = message.replaceAll("</p>", "\n");
   message = message.replaceAll("<p>", "");
   message = message.replaceAll("&nbsp;", " ");
   message = message.replaceAll("<br>", "");

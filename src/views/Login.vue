@@ -51,7 +51,7 @@
         <div class="divider"></div>
 
         <div class="button-container">
-          <div @click="if(!login_loading){ login(); }" class="btn btn-primary">Login <img v-if="login_loading" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
+          <div @click="if(!login_loading){ login(); }" class="btn btn-primary btn-lg">Login <img v-if="login_loading" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
         </div>
 
         <a class="forgot-password" @click="$router.push('/account/forgot-password')">Forgot password</a>
@@ -114,7 +114,7 @@
             <div class="divider"></div>
 
             <div class="button-container">
-              <div class="btn btn-primary" @click="if(!register_loading){ register(); }">Create account <img v-if="register_loading" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
+              <div class="btn btn-primary btn-lg" @click="if(!register_loading){ register(); }">Create account <img v-if="register_loading" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
             </div>
 
             <a class="forgot-password" @click="$router.push('/account/login')">I already have an account</a>
@@ -171,7 +171,7 @@
         <div class="divider"></div>
 
         <div class="button-container">
-          <div @click="if(!loading_password_reset){requestPasswordReset();}" class="btn btn-primary">Send me a password reset <img v-if="loading_password_reset" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
+          <div @click="if(!loading_password_reset){requestPasswordReset();}" class="btn btn-primary btn-lg">Send me a password reset <img v-if="loading_password_reset" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
         </div>
 
         <a class="forgot-password" @click="$router.push('/account/login')">I've remembered my login</a>
@@ -195,7 +195,7 @@
         <div class="divider"></div>
 
         <h3 style="margin-bottom: 10px;">Having trouble?</h3>
-        <div @click="resendEmailVerification()" class="btn btn-primary">Resend email</div>
+        <div @click="resendEmailVerification()" class="btn btn-primary btn-lg">Resend email</div>
 
       </div>
     </div>
@@ -263,7 +263,7 @@
             <div class="divider"></div>
 
             <div class="button-container">
-              <div class="btn btn-primary" @click="if(!reset_loading){ resetPassword(); }">Reset password <img v-if="reset_loading" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
+              <div class="btn btn-primary btn-lg" @click="if(!reset_loading){ resetPassword(); }">Reset password <img v-if="reset_loading" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
             </div>
 
           </div>

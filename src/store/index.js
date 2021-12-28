@@ -39,15 +39,15 @@ const getters = {
 //to handle actions
 const actions = {
 
-  getAccount({ commit, state }) {
-    if(state.account == null){
+  getAccount({ commit, state }, {force_reload=false}) {
+    if(state.account == null || force_reload){
       api_request('GET','/account/details').then((resp) => {
         commit("SET_ACCOUNT",resp);
       });
     }
   },
 
-  async getLevel({ commit, state, dispatch }, { course_slug, chapter_slug, level_slug }){
+  async getLevel({ commit, state, dispatch }, { course_slug, chapter_slug, level_slug, force_reload=false }){
 
       if(!state.courses.hasOwnProperty(course_slug) || !state.courses[course_slug].hasOwnProperty('chapters')){
         //Course not fetched yet
@@ -67,8 +67,8 @@ const actions = {
             }
           });
       }
-      else if(!state.courses[course_slug].chapters[chapter_slug].levels.hasOwnProperty(level_slug) || !state.courses[course_slug].chapters[chapter_slug].levels[level_slug].hasOwnProperty('brief')){
-        //Level not been fetched yet
+      else if(force_reload || (!state.courses[course_slug].chapters[chapter_slug].levels.hasOwnProperty(level_slug) || !state.courses[course_slug].chapters[chapter_slug].levels[level_slug].hasOwnProperty('brief'))){
+        //Level not been fetched yet, or force reload enabled
         let resp = await api_request('GET','/courses/'+course_slug+'/chapters/'+chapter_slug+'/level/'+level_slug);
         await commit("SET_LEVEL",{
           level: resp,

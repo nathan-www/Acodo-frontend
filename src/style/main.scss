@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Roboto+Mono&family=Source+Code+Pro&display=swap');
 
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -37,8 +37,7 @@ body {
 }
 
 .tooltip {
-
-  &.tooltip-top{
+  &.tooltip-top {
     transform: translateX(-50%) translateY(-100%);
 
     .arrow {
@@ -48,12 +47,11 @@ body {
     }
   }
 
-  &:not(.tooltip-top){
+  &:not(.tooltip-top) {
     .arrow {
       top: 0;
     }
   }
-
   position: fixed;
   display: inline-block;
   padding: 5px 12px;
@@ -113,24 +111,33 @@ body {
   border-radius: 5px;
   cursor: pointer;
   user-select: none;
+
+
+  &.btn-lg{
+    font-size: 15px;
+    padding: 9px 35px;
+    border-radius: 7px;
+  }
 }
 
 .btn-primary {
   background-color: #005FFE;
   color: #fff;
   transition: filter 0.2s;
+  border: 2px solid transparent;
 
   &:hover {
     filter: drop-shadow(0px 0px 5px rgba(0, 95, 254, 0.25));
   }
 }
 
-.btn-danger{
+.btn-danger {
   background-color: #EC4747;
   color: #fff;
   transition: filter 0.2s;
+  border: 2px solid transparent;
 
-  &:hover{
+  &:hover {
     filter: drop-shadow(0px 0px 2px #EC4747);
   }
 }
@@ -139,6 +146,7 @@ body {
   background-color: #F0F7FF;
   color: #005FFE;
   transition: filter 0.2s;
+  border: 2px solid transparent;
 
   &:hover {
     filter: drop-shadow(0px 0px 2px rgba(0, 95, 254, 0.25));
@@ -165,7 +173,8 @@ body {
   height: 1em;
   animation: loadSpin 1s infinite;
   animation-timing-function: linear;
-  margin: 0 5px;
+  margin-left: 5px;
+  width: 1em;
 }
 @keyframes loadSpin {
   0% {
@@ -185,4 +194,102 @@ body {
 .color-danger,
 h1.color-danger {
   color: #EC4747;
+}
+
+.error-banner {
+  position: fixed;
+  left: 50%;
+  top: 15px;
+  background-color: #EC4747;
+  color: #fff;
+  padding: 5px 15px;
+  font-size: 14px;
+  border-radius: 5px;
+  transform: translateX(-50%);
+  z-index: 50;
+  transition: top 0.5s;
+  animation: slidedown 0.5s;
+
+  &.success{
+    background-color: #6FCF97;
+  }
+
+  &.slideup {
+    top: -50px;
+  }
+
+  .error-banner-close {
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    --ionicon-stroke-width: 40px;
+  }
+}
+@keyframes slidedown {
+  from {
+    top: -50px;
+  }
+
+  to {
+    top: 15px;
+  }
+}
+
+.dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  background-color: #fff;
+  box-shadow: 0 0 10px 4px rgba(196, 196, 196, 0.3);
+  border-radius: 10px;
+  border: 1px solid #ECEBED;
+  z-index: 10;
+  transition: transform 0.2s, opacity 0.2s;
+
+  animation: dialog-in 0.2s;
+
+  h3{
+    color: #151538;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  p{
+    color: #5F6266;
+    font-size: 13px;
+  }
+
+  &.shrunk{
+    transform: translate(-50%,-50%) scale(0.5);
+    opacity: 0;
+  }
+
+  .body{
+    margin: 30px;
+  }
+
+  .buttons{
+    margin-left: auto;
+    margin: 15px;
+
+    .btn{
+      margin-left: 10px;
+
+      &:first-child{
+        margin-left: auto;
+      }
+    }
+  }
+}
+
+@keyframes dialog-in{
+  from{
+    transform: translate(-50%,-50%) scale(0.5);
+    opacity: 0;
+  }
+  to{
+    transform: translate(-50%,-50%);
+    opacity: 1;
+  }
 }

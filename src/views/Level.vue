@@ -1,7 +1,11 @@
 <template>
 <Navbar>
   <template v-slot:biscuits>
-    <NavBiscuit title="Python" :items="[{title:'Basic Algorithms',levels_total:8,levels_done:1,active:true,link:'/courses/dfs/fds/fds'}]"></NavBiscuit>
+
+    <NavBiscuit v-if="level !== null && course !== null" biscuitType="chapters" :title="course.course_title" :items="Object.values(course.chapters).map((c)=>{return{title:c.chapter_title,levels_total:Object.keys(c.levels).length,levels_done:Object.keys(c.levels).filter((l)=>l.complete).length,active:(c.chapter_slug==chapter_slug),link:'/courses/'+course.course_slug+'/'+c.chapter_slug}})"></NavBiscuit>
+
+    <NavBiscuit v-if="level !== null && course !== null" biscuitType="levels" :title="course.chapters[chapter_slug].chapter_title" :items="Object.values(course.chapters[chapter_slug].levels).map((l)=>{return{title:l.level_title,levels_total:1,levels_done:(l.complete?1:0),active:(l.level_slug==level_slug),link:'/courses/'+course_slug+'/'+chapter_slug+'/'+l.level_slug}})"></NavBiscuit>
+
   </template>
 </Navbar>
 
@@ -30,6 +34,9 @@
         <div class="v-center">
           Chat
         </div>
+        <div class="v-center">
+          <span class="tab-count" v-if="messageCount > 0">({{AbbreviateNumber(messageCount)}})</span>
+        </div>
       </div>
 
       <div :class="'sidebar-tab flex ' + ((sidebarTab=='solutions') ? 'active':'')" @click="sidebarTab = 'solutions'">
@@ -38,6 +45,9 @@
         </div>
         <div class="v-center">
           Solutions
+        </div>
+        <div class="v-center">
+          <span class="tab-count" v-if="level !== null && level.solutions_count > 0">({{AbbreviateNumber(level.solutions_count)}})</span>
         </div>
       </div>
 
@@ -119,6 +129,16 @@
     <div class="sidebar-inner" v-if="sidebarTab == 'chat'">
 
       <div class="messages-scroll">
+
+        <div class="empty-area" v-if="sortedMessages.length == 0">
+
+          <h1>&#128564;</h1>
+          <p>
+            The chat is sleeping.<br />
+            Be the first to send a message!
+          </p>
+
+        </div>
 
         <template v-for="m in sortedMessages">
 
@@ -232,7 +252,7 @@
       </div>
 
 
-      <div class="send-box">
+      <div class="send-box" @keyup="(() => {  if(!this.sending_message && keysDown.includes(13) && (keysDown.includes(17) || keysDown.includes(224))){ sendMessage(); } })()">
 
         <div class="reply-to-banner" v-if="reply_to !== null">
           Replying to @{{reply_to.user.username}}
@@ -244,6 +264,7 @@
         </div>
 
         <Quill ref="messageEditor"></Quill>
+
 
         <div class="send-bar flex">
           <div data-tooltip="Inline code" data-tooltip-location="top" class="send-box-button code-button" @mousedown="$event.preventDefault()" @mouseup="$refs.messageEditor.inlinecode()">
@@ -279,12 +300,12 @@
 
     <div class="sidebar-inner" v-if="sidebarTab == 'solutions'">
 
-      <div class="solution-prompt" v-if="!level.complete && !level.forfeited && loading_solutions==false && solutions.length==0">
-        <h3>Are you sure you want to view the solutions?</h3>
-        <p>Since you have not solved this level yet we have hidden the solutions.</p>
-        <p style="margin-bottom: 20px;">If you choose to view the solutions you will forfeit any XP from this level and won't be allowed to publish your own solutions.</p>
+      <div class="solution-prompt" v-if="!level.complete && !level.forfeited && level.solutions_count > 0 && loading_solutions==false && Object.keys(solutions).length==0">
+        <h1>&#128274;</h1>
+        <h3>The solutions to this level are locked</h3>
+        <p>You haven't solved the level yet. If you choose to unlock solutions now, you will forfeit any XP and won't be able to publish your own solution. </p>
 
-        <a class="btn btn-danger" @click="fetchSolutions()">Forfeit and show solutions</a>
+        <a class="btn btn-primary" @click="fetchSolutions()">Forfeit and unlock solutions</a>
       </div>
 
       <div v-if="loading_solutions">
@@ -295,21 +316,33 @@
       </div>
 
 
-      <div class="solution flex" v-for="solution in solutions">
+      <div class="empty-area" v-if="level.solutions_count == 0 || (sortedSolutions.length == 0 && loading_solutions==false && (level.complete || level.forfeited))">
+
+        <h1>&#129488;</h1>
+        <p>
+          Nobody has submitted a solution yet.<br />
+          Could you be the first?
+        </p>
+
+      </div>
+
+      <div class="solution flex" v-for="solution in sortedSolutions">
 
         <div class="solution-left">
           <img :src="'https://robohash.org/'+MD5(solution.user.username)" alt="" class="profile-pic">
 
-          <div class="upvote-button">
-            <ion-icon name="arrow-up" class="betterIcon"></ion-icon>
-          </div>
-          <div class="vote-count">
-            {{ solution.upvotes - solution.downvotes }}
-          </div>
-          <div class="downvote-button">
-            <ion-icon name="arrow-down" class="betterIcon"></ion-icon>
-          </div>
+          <div :class="((solution.user_vote == 1) ? 'upvoted ':' ') + ((solution.user_vote == -1) ? 'downvoted ':'')">
+            <div class="upvote-button" @click="voteSolution(1,solution,'main')">
+              <ion-icon name="arrow-up" class="betterIcon"></ion-icon>
+            </div>
+            <div class="vote-count">
+              {{ solution.upvotes - solution.downvotes }}
+            </div>
+            <div class="downvote-button" @click="voteSolution(-1,solution,'main')">
+              <ion-icon name="arrow-down" class="betterIcon"></ion-icon>
+            </div>
 
+          </div>
         </div>
 
         <div class="solution-right">
@@ -322,29 +355,15 @@
             <div class="time">{{ ConvertTime(solution.timestamp,"semi-absolute") }}</div>
           </div>
 
-          <div class="code-block">
-            function knights(ranks, p, r) {
-            <br />const l = ranks.length;
-            <br />let [x, a, b, c] = [0, (p-1+l)%l, p%l, 1];
-            <br />while (c) {
-            <br /> c = 0;
-            <br /> while (ranks[a] == r) {
-            <br /> [a, x, c] = [(a-1+l)%l, x+1, c+1];
-            <br /> if (a == b) return 1 + (c + r != ranks[a] && r != ranks[a]);
-            <br /> } while (ranks[b] == r) {
-            <br /> [b, x, c] = [(b+1)%l, x+1, c+1];
-            <br /> if (a == b) return 1 + (c + r != ranks[a] && r != ranks[a]);
-            <br /> } r += c;
-            <br />} return l - x + 1;
-            }
-          </div>
+          <div class="code-block" v-html="decodeSolutionCode(solution.code)"></div>
 
           <div class="badges flex">
 
-            <div class="badge">
-              <span class="badge-icon">💡</span>
-              <span class="badge-text">Clever solution</span>
-              <span class="badge-count">2</span>
+            <div v-for="b in solutions[solution.solution_id].badges" :class="'badge ' + (((b.votes.filter((v) => v.user.username == account.username)).length > 0) ? 'voted':'')"
+              @click="voteSolution((((b.votes.filter((v) => v.user.username == account.username)).length > 0) ? -1:1), solution, b.badge_id)">
+              <span class="badge-icon">{{ he.decode(b.icon) }}</span>
+              <span class="badge-text">{{ b.name }}</span>
+              <span class="badge-count">{{ b.votes.length }}</span>
             </div>
 
           </div>
@@ -364,36 +383,48 @@
     <div class="code-area">
 
       <div class="code-tool-bar flex">
-        <div class="tool reload-button v-center" data-tooltip="Load default code">
+        <div class="tool reload-button v-center" data-tooltip="Reload default code" @click="reload_default_code()">
           <ion-icon name="refresh"></ion-icon>
         </div>
-        <div class="tool copy-button v-center" data-tooltip="Copy code">
+        <div class="tool copy-button v-center" data-tooltip="Copy code" @click="Banner('Copied to clipboard','success',2000,false); clipBoardCopy(code);">
           <ion-icon name="copy-outline"></ion-icon>
         </div>
-        <div class="tool save-button v-center" data-tooltip="Save draft">
-          <ion-icon name="save-outline"></ion-icon>
+
+        <div class="tool save-button v-center" data-tooltip="Save draft" @click="if(!saving_draft){ save_draft(); }">
+          <ion-icon name="save-outline" v-if="!saving_draft"></ion-icon>
+          <img class="inline-loader" style="margin: auto;" src="@/assets/img/loader-grey.png" alt="" v-else>
+        </div>
+
+        <div class="saved-message flex" v-if="saved_draft">
+          <div class="v-center">
+            <ion-icon name="checkmark-outline"></ion-icon>
+          </div>
+          <div class="v-center">
+            Saved
+          </div>
         </div>
 
         <div class="code-tool-bar-right flex">
-          <div class="btn btn-primary-light" data-tooltip="⌘R, Ctrl+R" @click="runCode()">
+
+          <div v-if="isMac" class="btn btn-primary-light" data-tooltip="⌘⇧R" @click="runCode()">
+            <ion-icon name="play-outline" class="betterIcon"></ion-icon> Run
+          </div>
+          <div v-else class="btn btn-primary-light" data-tooltip="Ctrl⇧R" @click="runCode()">
             <ion-icon name="play-outline" class="betterIcon"></ion-icon> Run
           </div>
 
-          <div class="btn btn-primary" v-if="level !== null && !level.complete && !level.forfeited">
-            Submit solution
+          <div class="btn btn-primary" @click="complete_level()" v-if="level !== null && !level.complete && !level.forfeited">
+            Submit solution <img style="margin-left: 5px; position: relative; top: 1px;" v-if="submitting_solution" class="inline-loader" src="@/assets/img/loader-white.png" alt="">
           </div>
-          <div class="btn btn-primary" v-else-if="level !== null && !level.complete && level.forfeited">
-            Complete
-          </div>
-          <div class="btn btn-primary" v-if="level !== null && level.complete && !level.forfeited">
-            Re-submit solution
+          <div class="btn btn-primary" @click="complete_level()" v-else-if="level !== null && !level.complete && level.forfeited">
+            Complete <img style="margin-left: 5px; position: relative; top: 1px;" v-if="submitting_solution" class="inline-loader" src="@/assets/img/loader-white.png" alt="">
           </div>
 
         </div>
       </div>
 
       <div class="code-editor-container">
-        <Codemirror v-model:value="code" :options="cmOptions" placeholder="test placeholder" />
+        <Codemirror v-model:value="code" :options="cmOptions" @change="saved_draft = false" />
       </div>
 
     </div>
@@ -435,6 +466,20 @@ import {
   MessageMarkdownToEditable
 } from '@/utility/MessageMarkdownConverter'
 
+import {
+  SafeBase64Encode,
+  SafeBase64Decode
+} from '@/utility/SafeBase64'
+
+import {
+  AbbreviateNumber
+} from '@/utility/AbbreviateNumber';
+
+window.MessageHTMLToMarkdown = MessageHTMLToMarkdown;
+
+
+
+
 export default {
   name: 'Level',
   components: {
@@ -447,6 +492,8 @@ export default {
   data() {
     return {
       code: "",
+      loaded_code: false,
+
       sidebarTab: "challenge",
       cmOptions: {
         mode: "python",
@@ -477,7 +524,18 @@ export default {
       deleting_message_timer: null,
 
       loading_solutions: false,
-      solutions: []
+      solutions: {},
+
+      he: he,
+
+      keysDown: [],
+
+      messageCount: 0,
+
+      saving_draft: false,
+      saved_draft: false,
+
+      submitting_solution: false
 
     }
   },
@@ -487,7 +545,25 @@ export default {
         this.$router.push('/404');
       }
 
-      if (level.hasOwnProperty('complete') && (level.complete || level.forfeited) && this.solutions.length == 0) {
+      if (level.hasOwnProperty('exists') && level.exists) {
+
+        //Load the code editor
+        if (!this.loaded_code) {
+
+          if (level.draft_code.code == "") {
+            this.code = atob(atob(level.default_code)); //No draft, load default code
+          } else {
+            this.code = SafeBase64Decode(atob(level.draft_code.code)); //Load draft code
+            this.saved_draft = true;
+          }
+
+          this.loaded_code = true;
+
+        }
+
+      }
+
+      if (level.hasOwnProperty('complete') && (level.complete || level.forfeited) && Object.keys(this.solutions).length == 0) {
         this.fetchSolutions();
       }
 
@@ -505,6 +581,9 @@ export default {
     },
     brief() {
       return MarkdownCoverter(atob(atob(this.level.brief)));
+    },
+    isMac() {
+      return navigator.platform.toUpperCase().indexOf('MAC') >= 0
     },
     sortedMessages() {
 
@@ -536,16 +615,69 @@ export default {
       });
 
       return messages;
+    },
+
+    sortedSolutions() {
+
+      let solutions = Object.values(this.solutions);
+
+      solutions = solutions.sort((a, b) => {
+        if ((a.net_votes_on_load) < (b.net_votes_on_load)) {
+          return 1;
+        } else if ((a.net_votes_on_load) == (b.net_votes_on_load)) {
+          if (a.timestamp < b.timestamp) {
+            return 1;
+          } else {
+            return -1;
+          }
+        } else {
+          return -1;
+        }
+      });
+
+      return solutions;
+
+    },
+
+    all_tests_passed() {
+
+      if (this.level == null) {
+        return false;
+      }
+
+      for (var i = 0; i < this.level.unit_tests.length; i++) {
+
+        let test = this.level.unit_tests[i];
+        if (!(this.unit_test_output.hasOwnProperty(test.test_id) && this.unit_test_output[test.test_id].passed)) {
+          return false;
+        }
+
+      }
+
+      return true;
+
     }
 
   },
   methods: {
+    AbbreviateNumber(num) {
+      return AbbreviateNumber(num);
+    },
+
     runCode() {
       this.$refs.PythonEmulator.runCode({
         code: this.code,
         tests: this.level.unit_tests,
         test_code: atob(atob(this.level.test_code))
       });
+    },
+    HTMLentities(r) {
+      return r.replace(/[\x26\x0A\<>'"]/g, function(r) {
+        return "&#" + r.charCodeAt(0) + ";"
+      })
+    },
+    atob(a) {
+      return atob(a);
     },
     MarkdownCoverter(md) {
       return MarkdownCoverter(md)
@@ -558,12 +690,36 @@ export default {
       this.unit_test_output = feedback;
     },
 
+    SafeBase64Decode(a) {
+      return SafeBase64Decode(a);
+    },
+
+    SafeBase64Encode(a) {
+      return SafeBase64Encode(a);
+    },
+
     decodeMessage(m) {
       try {
-        return MessageMarkdownToHTML(atob(atob(m)))
+        return MessageMarkdownToHTML(SafeBase64Decode(atob(m)))
       } catch (e) {
         return MessageMarkdownToHTML("*Message unreadable*")
       }
+    },
+
+    decodeSolutionCode(s) {
+
+      function HTMLentities(r) {
+        return r.replace(/[\x26\x0A\<>'"]/g, function(r) {
+          return "&#" + r.charCodeAt(0) + ";"
+        })
+      }
+
+      return HTMLentities(SafeBase64Decode(atob(s))).replaceAll(" ", "&nbsp").replaceAll("\n", "<br>").replaceAll("&#10;", "<br>").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+
+    },
+
+    clipBoardCopy(text) {
+      navigator.clipboard.writeText(text);
     },
 
     MD5(text) {
@@ -585,6 +741,11 @@ export default {
           if (resp.last_change > 0) {
             this.messages_since = resp.last_change;
           }
+
+          if (Object.keys(this.messages).length == 0) {
+            this.messageCount = resp.messages.length;
+          }
+
 
           //Process all top-level messages
           resp.messages.filter((m) => m.reply_to == "").forEach((message) => {
@@ -624,17 +785,81 @@ export default {
       });
     },
 
-    fetchSolutions() {
+    fetchSolutions(suppressLoading = false) {
 
+      if (!suppressLoading) {
+        this.loading_solutions = true;
+      }
 
-      this.loading_solutions = true;
       this.api_request('GET', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/solutions').then((resp) => {
         if (resp.status == "success") {
-          this.solutions = resp.solutions;
+
+          resp.solutions.forEach((s) => {
+
+            s.net_votes_on_load = s.upvotes - s.downvotes;
+            if (this.solutions.hasOwnProperty(s.solution_id)) {
+              s.net_votes_on_load = this.solutions[s.solution_id].net_votes_on_load;
+            }
+
+            let obj = {};
+            obj[s.solution_id] = s;
+            this.solutions = Object.assign({}, this.solutions, obj);
+
+          });;
         }
         this.loading_solutions = false;
       });
 
+    },
+
+    voteSolution(vote, solution, type) {
+
+
+      if (type == "main") {
+        if (vote == solution.user_vote) {
+          vote = 0;
+        }
+
+        if (solution.user_vote == 1) {
+          solution.upvotes -= 1;
+        }
+        if (solution.user_vote == -1) {
+          solution.downvotes -= 1;
+        }
+        if (vote == 1) {
+          solution.upvotes += 1;
+        }
+        if (vote == -1) {
+          solution.downvotes += 1;
+        }
+
+        solution.user_vote = vote;
+
+      } else {
+
+        for (var i = 0; i < this.solutions[solution.solution_id].badges.length; i++) {
+          let b = this.solutions[solution.solution_id].badges[i];
+          if (b.badge_id == type) {
+            this.solutions[solution.solution_id].badges[i]['votes'] = this.solutions[solution.solution_id].badges[i]['votes'].filter((v) => v.user.username !== this.account.username);
+          }
+          if (b.badge_id == type && vote == 1) {
+            this.solutions[solution.solution_id].badges[i]['votes'].push({
+              user: {
+                user_id: this.account.user_id,
+                username: this.account.username,
+                xp: this.account.xp
+              }
+            })
+          }
+        }
+
+      }
+
+      this.api_request('POST', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/solutions/vote', {
+        solution_id: solution.solution_id,
+        vote: vote,
+        vote_type: type
+      }).then((resp) => {})
 
     },
 
@@ -688,8 +913,6 @@ export default {
 
     deleteMessage() {
 
-      console.log(this.messages);
-
       this.api_request('POST', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/messages/delete', {
         message_id: this.deleting_message.message_id,
       }).then(() => {
@@ -707,22 +930,41 @@ export default {
 
     sendMessage() {
 
-      let obj = {
-        message_content: btoa(MessageHTMLToMarkdown(this.send_message_content))
-      }
+      if (MessageHTMLToMarkdown(this.send_message_content).trim().length == 0) {
+        //Soft fail
+      } else if (MessageHTMLToMarkdown(this.send_message_content).trim().length > 2500) {
+        this.Banner("Message too long! Maximum 2500 characters");
+      } else {
 
-      if (this.reply_to !== null) {
-        obj.reply_to = this.reply_to.message_id;
-      }
+        let obj = {
+          message_content: SafeBase64Encode(MessageHTMLToMarkdown(this.send_message_content))
+        }
 
-      this.sending_message = true;
-      this.api_request('POST', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/messages/send', obj, 300).then(() => {
-        this.send_message_content = "";
-        this.$refs.messageEditor.editor.root.innerHTML = "";
-        this.fetchMessages();
-        this.reply_to = null;
-        this.sending_message = false;
-      });
+        if (this.reply_to !== null) {
+          obj.reply_to = this.reply_to.message_id;
+        }
+
+        this.sending_message = true;
+        this.api_request('POST', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/messages/send', obj, 300).then((resp) => {
+
+          this.sending_message = false;
+
+          if (resp.status == "success") {
+            this.send_message_content = "";
+            this.$refs.messageEditor.editor.root.innerHTML = "";
+            this.fetchMessages();
+            this.reply_to = null;
+          } else {
+            if (resp.error_message == "You are sending messages too fast") {
+              this.Banner("You are sending messages too fast");
+            } else {
+              this.Banner("Failed to send message");
+            }
+          }
+
+        });
+
+      }
 
     },
 
@@ -751,11 +993,116 @@ export default {
         this.sending_message = false;
       });
 
+    },
+
+    save_draft() {
+
+      this.saving_draft = true;
+      this.api_request('POST', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/saveDraft', {
+        code: SafeBase64Encode(this.code),
+      }, 500).then((resp) => {
+
+        if (resp.status !== "success") {
+          this.Banner("Failed to save draft code");
+        } else {
+          this.saved_draft = true;
+        }
+
+        this.saving_draft = false;
+
+      })
+
+    },
+
+    reload_default_code() {
+
+      let confirm = this.ConfirmDialog('Are you sure you want to reload the default code?', 'You will lose any code you are currently working on', 'Yes, reload')
+      confirm.then(() => {
+        this.code = atob(atob(this.level.default_code));
+      });
+
+    },
+
+    getV() {
+      /*
+      Congrats, you've found the secret salt!
+      To support the Acodo community, please do not abuse this.
+      */
+      console.log("super_secret_salt_eq55M4Q2xQ" + this.account.user_id)
+      return "super_secret_salt_eq55M4Q2xQ" + this.account.user_id;
+    },
+
+    complete_level() {
+
+      if (!this.all_tests_passed) {
+        this.Banner("Your code must pass all the tests before you can complete the level");
+        return null;
+      }
+
+
+
+      if (!this.level.forfeited) {
+
+        this.ConfirmDialog("Ready to submit your solution?", ".", "Submit and complete", "primary").then(() => {
+
+          this.save_draft();
+
+          this.submitting_solution = true;
+          let code = SafeBase64Encode(this.code);
+          let v = MD5(code + this.getV());
+
+
+          this.api_request('POST', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/solutions/submit', {
+            code: code,
+            v: v
+          }, 600).then(() => {
+
+
+            this.api_request('POST', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/markComplete').then(() => {
+              this.$store.dispatch('getLevel', {
+                'course_slug': this.course_slug,
+                'chapter_slug': this.chapter_slug,
+                'level_slug': this.level_slug,
+                'force_reload': true
+              });
+              this.$store.dispatch('getAccount', {
+                'force_reload': true
+              });
+
+              this.submitting_solution = false;
+            })
+
+          });
+        })
+
+      } else {
+
+        this.submitting_solution = true;
+
+        this.api_request('POST', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/markComplete', {}, 600).then(() => {
+          this.$store.dispatch('getLevel', {
+            'course_slug': this.course_slug,
+            'chapter_slug': this.chapter_slug,
+            'level_slug': this.level_slug,
+            'force_reload': true
+          });
+          this.$store.dispatch('getAccount', {
+            'force_reload': true
+          });
+          this.submitting_solution = false;
+
+        });
+
+      }
+
+
+
     }
 
   },
   beforeDestroy() {
     clearInterval(this.messages_timer);
+    clearInterval(this.save_timer);
   },
   mounted() {
 
@@ -765,8 +1112,36 @@ export default {
       'level_slug': this.level_slug
     });
 
+    window.addEventListener('keydown', (e) => {
+      this.keysDown = this.keysDown.filter((i) => i !== e.keyCode);
+      this.keysDown.push(e.keyCode);
+
+      if ((this.keysDown.includes(17) || this.keysDown.includes(224)) && this.keysDown.includes(83)) {
+        e.preventDefault();
+        this.save_draft();
+        this.keysDown = this.keysDown.filter((i) => i !== e.keyCode);
+      }
+
+      if ((this.keysDown.includes(17) || this.keysDown.includes(224)) && this.keysDown.includes(16) && this.keysDown.includes(82)) {
+        e.preventDefault();
+        this.runCode();
+        this.keysDown = this.keysDown.filter((i) => i !== e.keyCode);
+      }
+
+    });
+    window.addEventListener('keyup', (e) => {
+      this.keysDown = this.keysDown.filter((i) => i !== e.keyCode);
+    });
+
     this.fetchMessages();
     this.messages_timer = setInterval(this.fetchMessages, 7000);
+
+    this.save_timer = setInterval(() => {
+      if (!this.saved_draft) {
+        //Autosave?
+        //this.save_draft();
+      }
+    }, 20000)
 
   }
 }
@@ -847,6 +1222,37 @@ div.test-area span.inline-code {
 </style>
 
 <style lang="scss" scoped>
+.profile-pic.loader-grey,
+.vote-count {
+    user-select: none;
+}
+
+.saved-message {
+    --ionicon-stroke-width: 50px;
+    color: #6FCF97;
+    font-size: 14px;
+    user-select: none;
+
+    ion-icon {
+        margin-right: 2px;
+    }
+}
+
+.tab-count {
+    font-size: 12px;
+    position: relative;
+    font-weight: 500;
+    padding-left: 5px;
+}
+
+.solution-prompt {
+    margin: 20px;
+    text-align: center;
+    p:last-of-type {
+        margin-bottom: 25px;
+    }
+}
+
 .reply-to-banner {
     background-color: #151538;
     color: #fff;
@@ -872,13 +1278,13 @@ div.test-area span.inline-code {
 .unit_testing_error {
     background-color: #EC4747;
     color: #fff;
-    padding: 5px;
+    padding: 5px 8px;
     border-radius: 5px;
     margin-bottom: 15px;
     font-size: 13px;
 
     .left-icon {
-        margin-right: 5px;
+        margin-right: 8px;
         font-size: 18px;
     }
 }
@@ -995,6 +1401,15 @@ p {
     }
 }
 
+.empty-area {
+    text-align: center;
+    margin: 20px;
+
+    h1 {
+        margin-bottom: 20px;
+    }
+}
+
 .sidebar {
     width: 450px;
     height: 100%;
@@ -1015,6 +1430,8 @@ p {
     padding: 4px 8px;
     border-radius: 4px;
     cursor: pointer;
+
+    white-space: nowrap;
 
     &:first-child {
         margin-left: 0;
@@ -1099,11 +1516,11 @@ p {
 .sidebar-breadcrumb {
     font-size: 12px;
     color: #A2A0A7;
-    cursor: pointer;
     margin-bottom: 5px;
 
     a {
         transition: color 0.2s;
+        cursor: pointer;
     }
 
     & a:hover {
@@ -1417,6 +1834,7 @@ p {
                 position: relative;
                 top: -1px;
                 margin-left: 2px;
+                user-select: none;
             }
 
             &.italic {
@@ -1426,6 +1844,7 @@ p {
                 position: relative;
                 top: -1px;
                 margin-left: 2px;
+                user-select: none;
             }
         }
 
@@ -1445,6 +1864,12 @@ p {
 
 .solution {
 
+    margin-top: 25px;
+
+    &:first-child {
+        margin-top: 0;
+    }
+
     .solution-left {
         width: 40px;
     }
@@ -1454,6 +1879,16 @@ p {
     .vote-count {
         text-align: center;
         color: #A0A1A7;
+    }
+
+    .upvoted .upvote-button,
+    .upvoted .vote-count {
+        color: #6FCF97;
+    }
+
+    .downvoted .downvote-button,
+    .downvoted .vote-count {
+        color: #EC4747;
     }
 
     .downvote-button,
@@ -1508,14 +1943,25 @@ p {
         user-select: none;
     }
 
+    .badges {
+        flex-wrap: wrap;
+    }
+
     .badge {
         background-color: #EDEDED;
         padding: 2px 9px 3px;
         border-radius: 5px;
         cursor: pointer;
         transition: background-color 0.2s;
-
+        margin-right: 5px;
+        user-select: none;
         margin-top: 5px;
+        white-space: nowrap;
+        border: 1px solid transparent;
+
+        &.voted {
+            border: 1px solid #6FCF97;
+        }
 
         &:hover {
             background-color: #E5E5E5;

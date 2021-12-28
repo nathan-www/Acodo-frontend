@@ -27,7 +27,9 @@
   <div class="nav-middle flex">
 
     <div class="biscuit-container v-center">
-      <slot name="biscuits"></slot>
+      <div class="flex">
+        <slot name="biscuits"></slot>
+      </div>
     </div>
 
   </div>
@@ -194,7 +196,9 @@
 
 <script>
 import NavBiscuit from './NavBiscuit.vue'
-import { MD5 } from '@/utility/MD5'
+import {
+  MD5
+} from '@/utility/MD5'
 
 export default {
   name: 'Navbar',
@@ -226,13 +230,12 @@ export default {
     }
   },
   mounted() {
-    this.$store.dispatch('getAccount')
+    this.$store.dispatch('getAccount', {})
   }
 }
 </script>
 
 <style scoped lang="scss">
-
 .nav {
     background-color: #fff;
     width: 100%;
