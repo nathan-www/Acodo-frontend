@@ -17,6 +17,17 @@ const routes = [
     component: () => import('../views/Level.vue')
   },
   {
+    path: '/courses/:course_slug',
+    alias:'/courses/:course_slug/:chapter_slug',
+    name: 'Course',
+    component: () => import('../views/Course.vue')
+  },
+  {
+    path: '/@/:username',
+    name: 'Profile',
+    component: () => import('../views/Profile.vue')
+  },
+  {
     path: '/:path(.*)*',
     name: 'NotFound',
     component: () => import('../views/404.vue')

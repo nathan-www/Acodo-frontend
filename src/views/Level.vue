@@ -1,10 +1,15 @@
 <template>
+
 <Navbar>
   <template v-slot:biscuits>
 
-    <NavBiscuit v-if="level !== null && course !== null" biscuitType="chapters" :title="course.course_title" :items="Object.values(course.chapters).map((c)=>{return{title:c.chapter_title,levels_total:Object.keys(c.levels).length,levels_done:Object.keys(c.levels).filter((l)=>l.complete).length,active:(c.chapter_slug==chapter_slug),link:'/courses/'+course.course_slug+'/'+c.chapter_slug}})"></NavBiscuit>
+    <NavBiscuit v-if="level !== null && course !== null" biscuitType="chapters" :title="course.course_title"
+      :items="Object.values(course.chapters).map((c)=>{return{title:c.chapter_title,levels_total:Object.keys(c.levels).length,levels_done:Object.values(c.levels).filter((l)=>l.complete).length,active:(c.chapter_slug==chapter_slug),link:'/courses/'+course.course_slug+'/'+c.chapter_slug}})">
+    </NavBiscuit>
 
-    <NavBiscuit v-if="level !== null && course !== null" biscuitType="levels" :title="course.chapters[chapter_slug].chapter_title" :items="Object.values(course.chapters[chapter_slug].levels).map((l)=>{return{title:l.level_title,levels_total:1,levels_done:(l.complete?1:0),active:(l.level_slug==level_slug),link:'/courses/'+course_slug+'/'+chapter_slug+'/'+l.level_slug}})"></NavBiscuit>
+    <NavBiscuit v-if="level !== null && course !== null" biscuitType="levels" :title="course.chapters[chapter_slug].chapter_title"
+      :items="Object.values(course.chapters[chapter_slug].levels).map((l)=>{return{title:l.level_title,levels_total:1,levels_done:(l.complete?1:0),active:(l.level_slug==level_slug),link:'/courses/'+course_slug+'/'+chapter_slug+'/'+l.level_slug}})">
+    </NavBiscuit>
 
   </template>
 </Navbar>
@@ -151,7 +156,7 @@
 
             <div class="message-right">
               <div class="flex">
-                <div class="username">{{m.user.username}}</div>
+                <div class="username" @click="$router.push('/@/'+m.user.username)">{{m.user.username}}</div>
                 <div class="xp">
                   <ion-icon class="betterIcon" name="sparkles-sharp"></ion-icon>{{m.user.xp}} xp
                 </div>
@@ -208,7 +213,7 @@
 
             <div class="message-right reply">
               <div class="flex">
-                <div class="username">{{r.user.username}}</div>
+                <div class="username" @click="$router.push('/@/'+r.user.username)">{{r.user.username}}</div>
                 <div class="xp">
                   <ion-icon class="betterIcon" name="sparkles-sharp"></ion-icon>{{r.user.xp}} xp
                 </div>
@@ -348,7 +353,7 @@
         <div class="solution-right">
 
           <div class="flex">
-            <div class="username">{{ solution.user.username }}</div>
+            <div class="username" @click="$router.push('/@/'+solution.user.username)">{{ solution.user.username }}</div>
             <div class="xp">
               <ion-icon class="betterIcon" name="sparkles-sharp"></ion-icon>{{ solution.user.xp }} xp
             </div>
@@ -541,35 +546,32 @@ export default {
   },
   watch: {
     level: function(level) {
-      if (level.hasOwnProperty('exists') && !level.exists) {
-        this.$router.push('/404');
-      }
 
-      if (level.hasOwnProperty('exists') && level.exists) {
-
-        //Load the code editor
-        if (!this.loaded_code) {
-
-          if (level.draft_code.code == "") {
-            this.code = atob(atob(level.default_code)); //No draft, load default code
-          } else {
-            this.code = SafeBase64Decode(atob(level.draft_code.code)); //Load draft code
-            this.saved_draft = true;
-          }
-
-          this.loaded_code = true;
-
+      if(level.hasOwnProperty('exists') && !level.exists){
+        if(this.isLoggedIn == false){
+          this.$router.push('/account/login');
+        } else if(this.$store.state.isLoggedIn == true){
+          this.$router.push('/404');
         }
-
       }
 
-      if (level.hasOwnProperty('complete') && (level.complete || level.forfeited) && Object.keys(this.solutions).length == 0) {
-        this.fetchSolutions();
+      this.loadStuff();
+
+    },
+    isLoggedIn: function(isLoggedIn) {
+
+      if(isLoggedIn == false){
+        this.$router.push('/account/login');
+      } else if(this.level!==null && this.level.hasOwnProperty('exists') && !this.level.exists){
+        this.$router.push('/404');
       }
 
     }
   },
   computed: {
+    isLoggedIn() {
+      return this.$store.state.isLoggedIn;
+    },
     account() {
       return this.$store.getters.getAccount;
     },
@@ -660,6 +662,37 @@ export default {
 
   },
   methods: {
+
+    loadStuff() {
+
+      if (this.level.hasOwnProperty('exists') && this.level.exists) {
+
+
+        //Load the code editor
+        if (!this.loaded_code) {
+
+
+          if (this.level.draft_code.code == "") {
+
+            this.code = atob(atob(this.level.default_code)); //No draft, load default code
+          } else {
+            this.code = SafeBase64Decode(atob(this.level.draft_code.code)); //Load draft code
+            this.saved_draft = true;
+          }
+
+          this.loaded_code = true;
+
+        }
+
+      }
+
+      if (this.level.hasOwnProperty('complete') && (this.level.complete || this.level.forfeited) && Object.keys(this.solutions).length == 0) {
+        this.fetchSolutions();
+      }
+
+    },
+
+
     AbbreviateNumber(num) {
       return AbbreviateNumber(num);
     },
@@ -970,7 +1003,7 @@ export default {
 
     edit_message(m) {
       this.editing_message = m;
-      this.$refs.messageEditor.editor.root.innerHTML = MessageMarkdownToEditable(atob(atob(m.message_content)));
+      this.$refs.messageEditor.editor.root.innerHTML = MessageMarkdownToEditable(SafeBase64Decode(atob(m.message_content)));
     },
 
     stop_editing() {
@@ -983,7 +1016,7 @@ export default {
       this.sending_message = true;
       this.api_request('POST', '/courses/' + this.course_slug + '/chapters/' + this.chapter_slug + '/level/' + this.level_slug + '/messages/edit', {
         message_id: this.editing_message.message_id,
-        message_content: btoa(MessageHTMLToMarkdown(this.send_message_content))
+        message_content: SafeBase64Encode(MessageHTMLToMarkdown(this.send_message_content))
       }, 300).then(() => {
         this.send_message_content = "";
         this.$refs.messageEditor.editor.root.innerHTML = "";
@@ -1006,6 +1039,14 @@ export default {
           this.Banner("Failed to save draft code");
         } else {
           this.saved_draft = true;
+
+          this.$store.commit("SET_DRAFT", {
+            course_slug: this.course_slug,
+            chapter_slug: this.chapter_slug,
+            level_slug: this.level_slug,
+            code: SafeBase64Encode(this.code)
+          });
+
         }
 
         this.saving_draft = false;
@@ -1028,7 +1069,6 @@ export default {
       Congrats, you've found the secret salt!
       To support the Acodo community, please do not abuse this.
       */
-      console.log("super_secret_salt_eq55M4Q2xQ" + this.account.user_id)
       return "super_secret_salt_eq55M4Q2xQ" + this.account.user_id;
     },
 
@@ -1100,11 +1140,16 @@ export default {
     }
 
   },
-  beforeDestroy() {
+  beforeRouteLeave() {
     clearInterval(this.messages_timer);
     clearInterval(this.save_timer);
+    this.loaded_code = false;
   },
-  mounted() {
+  created() {
+
+    if (this.level !== null && this.level.hasOwnProperty('brief')) {
+      this.loadStuff();
+    }
 
     this.$store.dispatch('getLevel', {
       'course_slug': this.course_slug,
@@ -1134,14 +1179,17 @@ export default {
     });
 
     this.fetchMessages();
+
     this.messages_timer = setInterval(this.fetchMessages, 7000);
+
 
     this.save_timer = setInterval(() => {
       if (!this.saved_draft) {
         //Autosave?
         //this.save_draft();
       }
-    }, 20000)
+    }, 20000);
+
 
   }
 }
@@ -1750,6 +1798,7 @@ p {
         color: #151538;
         font-weight: 500;
         font-size: 14px;
+        cursor: pointer;
     }
 
     .xp {
@@ -1923,6 +1972,7 @@ p {
         color: #151538;
         font-weight: 500;
         font-size: 14px;
+        cursor: pointer;
     }
 
     .xp {

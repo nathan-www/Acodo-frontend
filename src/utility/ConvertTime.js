@@ -23,6 +23,10 @@ export function ConvertTime(timestamp, type="absolute") {
       return "Yesturday";
     } else if (Math.floor((current - timestamp) / (60 * 60 * 24)) < 7) {
       return Math.floor((current - timestamp) / (60 * 60 * 24)) + " days ago";
+    } else if ((Math.floor((current - timestamp) / (60 * 60 * 24 * 7))) == 1) {
+      return "1 week ago";
+    } else if ((Math.floor((current - timestamp) / (60 * 60 * 24 * 7))) < 5) {
+      return (Math.floor((current - timestamp) / (60 * 60 * 24 * 7))) + " weeks ago";
     } else if (Math.floor((current - timestamp) / (60 * 60 * 24 * 30)) == 1) {
       return "1 month ago";
     } else if (Math.floor((current - timestamp) / (60 * 60 * 24 * 30)) < 12) {

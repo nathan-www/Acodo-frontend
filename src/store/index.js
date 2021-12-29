@@ -2,28 +2,48 @@ import {
   createStore
 } from 'vuex'
 
-import { api_request } from '@/utility/ApiRequest'
+import {
+  api_request
+} from '@/utility/ApiRequest'
+
+import {
+  ConvertTime
+} from '@/utility/ConvertTime'
 
 //to handle state
 const state = {
 
   account: null,
   isLoggedIn: null,
-  courses: {}
+  courses: {},
+  profiles: {}
 
 }
 
 //to handle state
 const getters = {
+
+  getProfile: (state) => (username) => {
+    return state.profiles[username];
+  },
+
   getAccount: (state) => {
     return state.account;
   },
   getLevel: (state) => (course_slug, chapter_slug, level_slug) => {
-    try{
-      return state.courses[course_slug].chapters[chapter_slug].levels[level_slug];
-    }
-    catch(e){
-      if(state.courses.hasOwnProperty(course_slug) && ((state.courses[course_slug].hasOwnProperty('exists') && !state.courses[course_slug].exists) || (state.courses[course_slug].chapters[chapter_slug].hasOwnProperty('exists') && !state.courses[course_slug].chapters[chapter_slug].exists))){
+    try {
+      let level = state.courses[course_slug].chapters[chapter_slug].levels[level_slug];
+      if (level.hasOwnProperty('exists') && !level.exists) {
+        return {
+          exists: false
+        };
+      } else if (!level.hasOwnProperty('brief')) {
+        return null;
+      } else {
+        return level;
+      }
+    } catch (e) {
+      if (state.courses.hasOwnProperty(course_slug) && ((state.courses[course_slug].hasOwnProperty('exists') && !state.courses[course_slug].exists) || (state.courses[course_slug].chapters[chapter_slug].hasOwnProperty('exists') && !state.courses[course_slug].chapters[chapter_slug].exists))) {
         return {
           exists: false
         };
@@ -39,44 +59,94 @@ const getters = {
 //to handle actions
 const actions = {
 
-  getAccount({ commit, state }, {force_reload=false}) {
-    if(state.account == null || force_reload){
-      api_request('GET','/account/details').then((resp) => {
-        commit("SET_ACCOUNT",resp);
+  getProfile({
+    commit,
+    state
+  }, {
+    username
+  }) {
+
+    if (!state.profiles.hasOwnProperty(username)) {
+      api_request('GET', '/profile/' + username).then((resp) => {
+        commit("SET_PROFILE", resp);
+      });
+    }
+
+  },
+
+  getAccount({
+    commit,
+    state
+  }, {
+    force_reload = false
+  }) {
+    if (state.account == null || force_reload) {
+      api_request('GET', '/account/details').then((resp) => {
+        commit("SET_ACCOUNT", resp);
       });
     }
   },
 
-  async getLevel({ commit, state, dispatch }, { course_slug, chapter_slug, level_slug, force_reload=false }){
+  getCourse({
+    commit,
+    state
+  }, {
+    course_slug,
+    force_reload = false
+  }) {
 
-      if(!state.courses.hasOwnProperty(course_slug) || !state.courses[course_slug].hasOwnProperty('chapters')){
-        //Course not fetched yet
-        let resp = await api_request('GET','/courses/' + course_slug);
-        await commit("SET_COURSE",{
+    if (force_reload || (!state.courses.hasOwnProperty(course_slug) || !state.courses[course_slug].hasOwnProperty('chapters'))) {
+      //Course not fetched yet
+      api_request('GET', '/courses/' + course_slug).then((resp) => {
+        commit("SET_COURSE", {
           course: resp,
           course_slug: course_slug
-        });
-      }
-      if(!state.courses[course_slug].chapters.hasOwnProperty(chapter_slug)){
-          //Chapter does not exist
-          await commit("SET_CHAPTER",{
-            course_slug: course_slug,
-            chapter_slug: chapter_slug,
-            data: {
-              exists: false
-            }
-          });
-      }
-      else if(force_reload || (!state.courses[course_slug].chapters[chapter_slug].levels.hasOwnProperty(level_slug) || !state.courses[course_slug].chapters[chapter_slug].levels[level_slug].hasOwnProperty('brief'))){
-        //Level not been fetched yet, or force reload enabled
-        let resp = await api_request('GET','/courses/'+course_slug+'/chapters/'+chapter_slug+'/level/'+level_slug);
-        await commit("SET_LEVEL",{
-          level: resp,
-          course_slug: course_slug,
-          chapter_slug: chapter_slug,
-          level_slug: level_slug,
-        });
-      }
+        })
+      });
+    }
+
+  },
+
+  async getLevel({
+    commit,
+    state,
+    dispatch
+  }, {
+    course_slug,
+    chapter_slug,
+    level_slug,
+    force_reload = false
+  }) {
+
+    if (!state.courses.hasOwnProperty(course_slug) || !state.courses[course_slug].hasOwnProperty('chapters')) {
+      //Course not fetched yet
+      let resp = await api_request('GET', '/courses/' + course_slug);
+      await commit("SET_COURSE", {
+        course: resp,
+        course_slug: course_slug
+      });
+    }
+    if (!state.courses[course_slug].chapters.hasOwnProperty(chapter_slug)) {
+      //Chapter does not exist
+      await commit("SET_CHAPTER", {
+        course_slug: course_slug,
+        chapter_slug: chapter_slug,
+        data: {
+          exists: false
+        }
+      });
+    } else if (force_reload || (!state.courses[course_slug].chapters[chapter_slug].levels.hasOwnProperty(level_slug) || !state.courses[course_slug].chapters[chapter_slug].levels[level_slug].hasOwnProperty('brief'))) {
+      //Level not been fetched yet, or force reload enabled
+      let resp = await api_request('GET', '/courses/' + course_slug + '/chapters/' + chapter_slug + '/level/' + level_slug);
+      await commit("SET_LEVEL", {
+        level: resp,
+        course_slug: course_slug,
+        chapter_slug: chapter_slug,
+        level_slug: level_slug,
+      });
+
+
+    }
 
   }
 
@@ -85,8 +155,8 @@ const actions = {
 //to handle mutations
 const mutations = {
 
-  SET_ACCOUNT(state,account){
-    if(account.status == "success"){
+  SET_ACCOUNT(state, account) {
+    if (account.status == "success") {
       state.isLoggedIn = true;
       state.account = account;
     } else {
@@ -94,8 +164,35 @@ const mutations = {
     }
   },
 
-  SET_LEVEL(state, { level,course_slug,chapter_slug,level_slug }){
-    if(level.status == "success"){
+  SET_PROFILE(state, profile) {
+    if (profile.status == "success") {
+      profile.last_seen_relative = ConvertTime(profile.last_seen, 'relative');
+      profile.last_seen_seconds = Math.ceil((new Date()) / 1000) - profile.last_seen
+      state.profiles[profile.username] = profile;
+    }
+  },
+
+  SET_DRAFT(state, {
+    course_slug,
+    chapter_slug,
+    level_slug,
+    code
+  }) {
+
+    try {
+      state.courses[course_slug].chapters[chapter_slug].levels[level_slug].draft_code.code = btoa(code);
+
+    } catch (e) {}
+
+  },
+
+  SET_LEVEL(state, {
+    level,
+    course_slug,
+    chapter_slug,
+    level_slug
+  }) {
+    if (level.status == "success") {
       state.courses[course_slug].chapters[chapter_slug].levels[level.level_slug] = level;
       state.courses[course_slug].chapters[chapter_slug].levels[level.level_slug].exists = true;
     } else {
@@ -104,18 +201,24 @@ const mutations = {
     }
   },
 
-  SET_COURSE(state, { course,course_slug }){
-    if(course.status == "success"){
+  SET_COURSE(state, {
+    course,
+    course_slug
+  }) {
+    if (course.status == "success") {
       state.courses[course.course_slug] = course;
       state.courses[course.course_slug].exists = true;
-    }
-    else{
+    } else {
       state.courses[course_slug] = {};
       state.courses[course_slug].exists = false;
     }
   },
 
-  SET_CHAPTER(state, { course_slug,chapter_slug,data }){
+  SET_CHAPTER(state, {
+    course_slug,
+    chapter_slug,
+    data
+  }) {
     state.courses[course_slug].chapters[chapter_slug] = data;
   }
 
