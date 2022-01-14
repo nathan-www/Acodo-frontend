@@ -1,4 +1,5 @@
 <template>
+  
 <Navbar></Navbar>
 
 <div class="main">
@@ -338,6 +339,25 @@
 
     </div>
 
+
+    <div class="right-cards" v-else>
+
+      <div class="right-card">
+        <div class="loadingFill" style="width: 300px; height: 30px;"></div>
+      </div>
+
+      <div class="right-card flex">
+        <div class="loadingFill" style="width: 200px; height: 200px; margin-right: 20px;"></div>
+        <div class="loadingFill" style="width: 200px; height: 200px; margin-right: 20px;"></div>
+      </div>
+
+      <div class="right-card">
+        <div class="loadingFill" style="width: 300px; height: 60px; margin-bottom: 20px;"></div>
+        <div class="loadingFill" style="width: 300px; height: 60px; margin-bottom: 20px;"></div>
+      </div>
+
+    </div>
+
   </div>
 </div>
 </template>
@@ -371,6 +391,17 @@ export default {
     },
     profile() {
       return this.$store.getters.getProfile(this.username);
+    },
+    nonexistent_profiles(){
+      return this.$store.state.nonexistent_profiles;
+    }
+  },
+  watch:{
+    nonexistent_profiles: function(nonexistent_profiles){
+      console.log("warch");
+      if(nonexistent_profiles.hasOwnProperty(this.username)){
+        this.$router.push('/404');
+      }
     }
   },
   methods: {
@@ -385,6 +416,10 @@ export default {
     this.$store.dispatch('getProfile', {
       'username': this.username
     });
+
+    if(this.nonexistent_profiles.hasOwnProperty(this.username)){
+      this.$router.push('/404');
+    }
   }
 }
 </script>
@@ -398,6 +433,7 @@ export default {
     .main-inner {
         margin: 0 auto;
         max-width: 1300px;
+        align-items: flex-start;
     }
 }
 

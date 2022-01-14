@@ -1083,7 +1083,7 @@ export default {
 
       if (!this.level.forfeited) {
 
-        this.ConfirmDialog("Ready to submit your solution?", ".", "Submit and complete", "primary").then(() => {
+        this.ConfirmDialog("Ready to submit your solution?", "You won't be able to edit your solution once it's published.", "Submit and complete", "primary").then(() => {
 
           this.save_draft();
 

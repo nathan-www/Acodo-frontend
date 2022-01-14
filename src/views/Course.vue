@@ -8,7 +8,6 @@
     <div class="card card-top flex" v-if="typeof(course) !== 'undefined' && course !== null">
       <div class="card-left">
 
-
         <div v-if="course.enrolled" class="btn btn-success btn-small enroll-btn" @click="unenroll()">
           <div class="flex">
             <div class="v-center">
@@ -32,7 +31,7 @@
         </div>
 
         <h1>{{course.course_title}}</h1>
-        <p>{{ course.description }}</p>
+        <p class="desc">{{ course.description }}</p>
         <div class="course-properties">
           <p><span class="key">Languages: </span> <span class="value">{{ course.languages.join(", ") }}</span></p>
           <p><span class="key">Difficulty: </span> <span class="value">{{ course.difficulty }}</span></p>
@@ -75,22 +74,38 @@
 
         <div class="v-center v-100">
 
-          <div class="thumbnail">
-            <div class="thumbnail-inner">
-              <div class="v-center v-100">
-                <div>
-                  <h2>
-                    <ion-icon class="betterIcon" name="code-outline"></ion-icon> Acodo
-                  </h2>
-                  <h1>{{ course.course_title }}</h1>
+          <div>
+            <div class="thumbnail-container">
+              <div class="thumbnail">
+                <div class="thumbnail-inner">
+                  <div class="v-center v-100">
+                    <div>
+                      <h2>
+                        <ion-icon class="betterIcon" name="code-outline"></ion-icon> Acodo
+                      </h2>
+                      <h1>{{ course.course_title }}</h1>
 
-                  <div class="language-badges flex">
-                    <div class="language-badge" v-for="l in course.languages">{{l}}</div>
+                      <div class="language-badges flex">
+                        <div class="language-badge" v-for="l in course.languages">{{l}}</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
+                <img src="@/assets/img/thumbnail-bgs/1.png" alt="">
               </div>
+
+              <div class="progress-bar" v-if="progress.done > 0">
+                <div class="progress-bar-inner" :style="'width: ' + Math.ceil((progress.done/progress.total)*100) + '%'"></div>
+              </div>
+
+              <div class="progress-text" v-if="progress.done > 0">
+                {{ Math.ceil((progress.done/progress.total)*100) }}% completed <ion-icon v-if="Math.ceil(progress.done/progress.total) == 1" class="betterIcon" name="checkmark-circle"></ion-icon>
+              </div>
+
             </div>
-            <img src="@/assets/img/thumbnail-bgs/1.png" alt="">
+
+
+
           </div>
 
         </div>
@@ -160,6 +175,17 @@ export default {
     },
     account() {
       return this.$store.getters.getAccount;
+    },
+    progress() {
+      return Object.values(this.course.chapters).reduce((prev, curr) => {
+        return {
+          total: (prev.total + Object.values(curr.levels).length),
+          done: (prev.done + Object.values(curr.levels).filter((l) => l.complete).length)
+        };
+      }, {
+        total: 0,
+        done: 0
+      })
     }
   },
   methods: {
@@ -199,6 +225,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+p.desc{
+  margin-right: 35px;
+}
+
+
 h1 {
     color: #151538;
     font-size: 25px;
@@ -222,6 +254,12 @@ h3 {
 p {
     font-size: 14px;
     color: #5F6266;
+}
+
+.progress-text{
+  padding: 10px;
+  font-size: 14px;
+  color: #6FCF97;
 }
 
 .main {
@@ -408,54 +446,72 @@ p {
     margin-left: auto;
 }
 
-.thumbnail {
+.thumbnail-container {
 
-    position: relative;
-    user-select: none;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #ECEBED;
 
-    .thumbnail-inner {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
+    .progress-bar {
         width: 100%;
-        padding: 20px;
+        height: 10px;
+        background-color: #F0F7FF;
 
-        h1 {
-            color: #fff;
-            font-size: 18px;
-            margin-bottom: 35px;
+        .progress-bar-inner {
+            background-color: #6FCF97;
+            height: 100%;
         }
-
-        h2 {
-            color: #A0A1A7;
-            font-size: 14px;
-            margin-bottom: 5px;
-            font-weight: 500;
-            --ionicon-stroke-width: 50px;
-        }
-
-        .language-badges {
-            position: absolute;
-            bottom: 25px;
-        }
-
-        .language-badge {
-            color: #001733;
-            background-color: #fff;
-            padding: 2px 8px;
-            border-radius: 100px;
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-right: 7px;
-        }
-
     }
 
-    img {
+    .thumbnail {
+
+        position: relative;
+        user-select: none;
         height: 180px;
-        border-radius: 10px;
+
+        .thumbnail-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            padding: 20px;
+
+            h1 {
+                color: #fff;
+                font-size: 18px;
+                margin-bottom: 35px;
+            }
+
+            h2 {
+                color: #A0A1A7;
+                font-size: 14px;
+                margin-bottom: 5px;
+                font-weight: 500;
+                --ionicon-stroke-width: 50px;
+            }
+
+            .language-badges {
+                position: absolute;
+                bottom: 25px;
+            }
+
+            .language-badge {
+                color: #001733;
+                background-color: #fff;
+                padding: 2px 8px;
+                border-radius: 100px;
+                font-size: 10px;
+                font-weight: 600;
+                text-transform: uppercase;
+                margin-right: 7px;
+            }
+
+        }
+
+        img {
+            height: 180px;
+        }
     }
 }
 </style>

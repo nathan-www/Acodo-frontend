@@ -1,4 +1,6 @@
 <template>
+
+
 <div class="nav flex">
 
   <div class="nav-left flex">
@@ -98,25 +100,25 @@
 
             <div>
 
-              <h3>{{account.username}} <span class="rank-badge">Newbie</span></h3>
+              <h3>{{account.username}} <span class="rank-badge">{{ getRank(account.xp)['currentRank'] }}</span></h3>
 
-              <div class="account-dropdown-stats flex">
+              <div class="account-dropdown-stats flex" v-if="profile !== null">
 
                 <div class="stat flex">
                   <div class="stat-icon v-center" data-tooltip="Streak (days)">
                     <ion-icon name="flame"></ion-icon>
                   </div>
                   <div class="v-center">
-                    <p class="stat-num">2</p>
+                    <p class="stat-num">{{ profile.stats.streak }}</p>
                   </div>
                 </div>
 
                 <div class="stat flex">
-                  <div class="stat-icon v-center" data-tooltip="Levels completed">
-                    <ion-icon name="star"></ion-icon>
+                  <div class="stat-icon v-center" data-tooltip="Solutions">
+                    <ion-icon name="checkbox"></ion-icon>
                   </div>
                   <div class="v-center">
-                    <p class="stat-num">5</p>
+                    <p class="stat-num">{{ profile.stats.solutions }}</p>
                   </div>
                 </div>
 
@@ -125,7 +127,7 @@
                     <ion-icon name="arrow-up-outline"></ion-icon>
                   </div>
                   <div class="v-center">
-                    <p class="stat-num">12</p>
+                    <p class="stat-num">{{ profile.stats.solution_upvotes }}</p>
                   </div>
                 </div>
 
@@ -136,16 +138,16 @@
 
 
 
-          <div class="rank-progress-bar">
-            <div class="progress-inner" style="width: 37%"></div>
+          <div class="rank-progress-bar" v-if="profile !== null">
+            <div class="progress-inner" :style="'width: ' +  ((account.xp/getRank(account.xp)['nextRankVal'])*100) + '%'"></div>
           </div>
-          <p class="label">26 xp until next rank</p>
+          <p class="label">{{ getRank(account.xp)['nextRankVal'] - account.xp }} xp until next rank ({{ getRank(account.xp)['nextRank'] }})</p>
 
         </div>
 
         <div class="account-dropdown-links">
 
-          <div class="dropdown-link flex">
+          <div class="dropdown-link flex" @click="$router.push('/my-courses')">
             <div class="icon v-center">
               <ion-icon name="apps"></ion-icon>
             </div>
@@ -154,7 +156,7 @@
             </div>
           </div>
 
-          <div class="dropdown-link flex">
+          <div class="dropdown-link flex" @click="$router.push('/@/'+username)">
             <div class="icon v-center">
               <ion-icon name="person"></ion-icon>
             </div>
@@ -163,7 +165,7 @@
             </div>
           </div>
 
-          <div class="dropdown-link flex">
+          <div class="dropdown-link flex" @click="$router.push('/settings')">
             <div class="icon v-center">
               <ion-icon name="cog"></ion-icon>
             </div>
@@ -210,6 +212,19 @@ export default {
   computed: {
     account() {
       return this.$store.getters.getAccount;
+    },
+    isLoggedIn() {
+      return this.$store.state.isLoggedIn;
+    },
+    username() {
+      if (this.account !== null) {
+        return this.account.username;
+      } else {
+        return null;
+      }
+    },
+    profile() {
+      return this.$store.getters.getProfile(this.username);
     }
   },
   components: {
@@ -218,7 +233,7 @@ export default {
   data() {
     return {
       showAccountDropdown: false,
-      showNotifications: false
+      showNotifications: false,
     }
   },
   methods: {
@@ -227,10 +242,48 @@ export default {
     },
     MD5(txt) {
       return MD5(txt);
+    },
+    getRank(xp){
+
+        let ranks = [0,20,50,100,150,200,250,300,350,500,1000,10000];
+
+        let currentRank = 0;
+
+        ranks.forEach((rank, i) => {
+          if(xp >= rank){
+            currentRank = i;
+          }
+        });
+
+        currentRank += 1;
+
+        return {
+          "currentRank": "Level " + currentRank,
+          "nextRank": "Level " + (currentRank + 1),
+          'nextRankVal': ranks[currentRank]
+        }
+
+
+    }
+  },
+  watch: {
+    isLoggedIn: function(isLoggedIn) {
+      if (isLoggedIn !== null && isLoggedIn) {
+        this.$store.dispatch('getProfile', {
+          'username': this.account.username
+        });
+      }
     }
   },
   mounted() {
     this.$store.dispatch('getAccount', {})
+
+    if (this.isLoggedIn !== null && this.isLoggedIn) {
+      this.$store.dispatch('getProfile', {
+        'username': this.account.username
+      });
+    }
+
   }
 }
 </script>

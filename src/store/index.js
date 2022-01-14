@@ -16,7 +16,9 @@ const state = {
   account: null,
   isLoggedIn: null,
   courses: {},
-  profiles: {}
+  profiles: {},
+  loadedCourses: false,
+  nonexistent_profiles:{}
 
 }
 
@@ -63,15 +65,29 @@ const actions = {
     commit,
     state
   }, {
-    username
+    username,
+    force_reload = false
   }) {
 
     if (!state.profiles.hasOwnProperty(username)) {
       api_request('GET', '/profile/' + username).then((resp) => {
-        commit("SET_PROFILE", resp);
+        commit("SET_PROFILE", { profile: resp, username: username });
       });
     }
 
+  },
+
+  getCourses({
+    commit,
+    state
+  }, {
+    force_reload = false
+  }) {
+    if (!state.loadedCourses || force_reload) {
+      api_request('GET', '/courses/').then((resp) => {
+        commit("SET_COURSES", resp);
+      });
+    }
   },
 
   getAccount({
@@ -164,11 +180,22 @@ const mutations = {
     }
   },
 
-  SET_PROFILE(state, profile) {
+  SET_COURSES(state, courses) {
+    if (courses.status == "success") {
+      state.loadedCourses = true;
+      state.courses = courses;
+    } else {
+      state.loadedCourses = false;
+    }
+  },
+
+  SET_PROFILE(state, { profile, username }) {
     if (profile.status == "success") {
       profile.last_seen_relative = ConvertTime(profile.last_seen, 'relative');
       profile.last_seen_seconds = Math.ceil((new Date()) / 1000) - profile.last_seen
       state.profiles[profile.username] = profile;
+    } else {
+      state.nonexistent_profiles = Object.assign({}, state.nonexistent_profiles, { [username]: true });
     }
   },
 

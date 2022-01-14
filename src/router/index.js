@@ -7,6 +7,16 @@ const routes = [
     component: () => import('../views/Library.vue')
   },
   {
+    path: '/my-courses',
+    name: 'MyCourses',
+    component: () => import('../views/MyCourses.vue')
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: () => import('../views/Settings.vue')
+  },
+  {
     path: '/account/:path(login|register|forgot-password|verify-email|verify|reset-password)',
     name: 'Login',
     component: () => import('../views/Login.vue')
