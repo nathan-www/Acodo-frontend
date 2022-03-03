@@ -48,7 +48,7 @@
 
     <div class="nocourses" v-if="loadedCourses && $store.state.courses.courses.filter((c) => c.enrolled).length == 0">
       <h3>You are not enrolled on any courses</h3>
-      <div class="btn btn-primary" @click="$router.push('/library')">
+      <div class="btn btn-primary" @click="router_push('/library')">
         <ion-icon class="betterIcon" name="apps"></ion-icon> Browse course library
       </div>
     </div>
@@ -59,7 +59,7 @@
 
       <div class="flex course-cards" v-if="loadedCourses">
 
-        <div class="course-card" v-for="course in $store.state.courses.courses.filter((c) => c.enrolled)" @click="$router.push('/courses/'+course.course_slug)">
+        <div class="course-card" v-for="course in $store.state.courses.courses.filter((c) => c.enrolled)" @click="router_push('/courses/'+course.course_slug)">
           <div class="thumbnail">
             <div class="thumbnail-inner">
 
@@ -151,7 +151,7 @@ export default {
   watch: {
     isLoggedIn: function(isLoggedIn) {
       if (isLoggedIn !== null && !isLoggedIn) {
-        this.$router.push('/account/login');
+        this.router_push('/account/login');
       }
     }
   },
@@ -189,7 +189,7 @@ export default {
     this.$store.dispatch('getCourses', {});
 
     if (this.isLoggedIn !== null && !this.isLoggedIn) {
-      this.$router.push('/account/login');
+      this.router_push('/account/login');
     }
 
   }

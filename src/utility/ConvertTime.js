@@ -10,7 +10,7 @@ export function ConvertTime(timestamp, type="absolute") {
   } else if ((current - timestamp) < 120) {
     return "1 minute ago";
   } else if (Math.floor((current - timestamp) / 60) < 60) {
-    return Math.floor((current - timestamp) / 60) + " minutes ago";
+    return Math.floor((current - timestamp) / 60) + " mins ago";
   } else if (Math.floor((current - timestamp) / (60 * 60)) == 1) {
     return "1 hour ago";
   } else if (Math.floor((current - timestamp) / (60 * 60)) < 24) {
@@ -20,7 +20,7 @@ export function ConvertTime(timestamp, type="absolute") {
   if (type == "relative") {
 
     if (Math.floor((current - timestamp) / (60 * 60 * 24)) == 1) {
-      return "Yesturday";
+      return "Yesterday";
     } else if (Math.floor((current - timestamp) / (60 * 60 * 24)) < 7) {
       return Math.floor((current - timestamp) / (60 * 60 * 24)) + " days ago";
     } else if ((Math.floor((current - timestamp) / (60 * 60 * 24 * 7))) == 1) {

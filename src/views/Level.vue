@@ -70,8 +70,8 @@
       <div v-else>
 
         <div class="sidebar-breadcrumb">
-          <a @click="$router.push('/courses/'+course.course_slug)">{{ course.course_title }}</a>
-          <ion-icon name="chevron-forward"></ion-icon><a @click="$router.push('/courses/'+course.course_slug+'/'+chapter_slug)">{{ course.chapters[chapter_slug].chapter_title }}</a>
+          <a @click="router_push('/courses/'+course.course_slug)">{{ course.course_title }}</a>
+          <ion-icon name="chevron-forward"></ion-icon><a @click="router_push('/courses/'+course.course_slug+'/'+chapter_slug)">{{ course.chapters[chapter_slug].chapter_title }}</a>
         </div>
 
         <div class="flex">
@@ -122,7 +122,7 @@
     <div class="footer" v-if="sidebarTab == 'challenge'">
       <p>
         <span v-if="level !== null && level.authors.length > 0">Author<span v-if="level.authors.length > 1">s</span>: </span>
-        <a v-if="level !== null" v-for="author in level.authors" @click="$router.push('/@/'+author.username)">{{author.username}}</a>
+        <a v-if="level !== null" v-for="author in level.authors" @click="router_push('/@/'+author.username)">{{author.username}}</a>
 
         <span class="float-right">&copy; Acodo, {{(new Date()).getFullYear()}}</span>
       </p>
@@ -150,13 +150,13 @@
           <div class="message flex">
 
             <div class="message-left">
-              <img :src="'https://robohash.org/'+MD5(m.user.username)" alt="" class="profile-pic">
+              <img :src="'https://robohash.org/'+MD5(m.user.username)" @click="router_push('/@/'+m.user.username)" alt="" class="profile-pic">
               <div class="sideline"></div>
             </div>
 
             <div class="message-right">
               <div class="flex">
-                <div class="username" @click="$router.push('/@/'+m.user.username)">{{m.user.username}}</div>
+                <div class="username" @click="router_push('/@/'+m.user.username)">{{m.user.username}}</div>
                 <div class="xp">
                   <ion-icon class="betterIcon" name="sparkles-sharp"></ion-icon>{{m.user.xp}} xp
                 </div>
@@ -207,13 +207,13 @@
             </div>
 
             <div class="message-left">
-              <img :src="'https://robohash.org/'+MD5(r.user.username)" alt="" class="profile-pic">
+              <img :src="'https://robohash.org/'+MD5(r.user.username)" @click="router_push('/@/'+r.user.username)" alt="" class="profile-pic">
               <div class="sideline"></div>
             </div>
 
             <div class="message-right reply">
               <div class="flex">
-                <div class="username" @click="$router.push('/@/'+r.user.username)">{{r.user.username}}</div>
+                <div class="username" @click="router_push('/@/'+r.user.username)">{{r.user.username}}</div>
                 <div class="xp">
                   <ion-icon class="betterIcon" name="sparkles-sharp"></ion-icon>{{r.user.xp}} xp
                 </div>
@@ -353,7 +353,7 @@
         <div class="solution-right">
 
           <div class="flex">
-            <div class="username" @click="$router.push('/@/'+solution.user.username)">{{ solution.user.username }}</div>
+            <div class="username" @click="router_push('/@/'+solution.user.username)">{{ solution.user.username }}</div>
             <div class="xp">
               <ion-icon class="betterIcon" name="sparkles-sharp"></ion-icon>{{ solution.user.xp }} xp
             </div>
@@ -549,9 +549,9 @@ export default {
 
       if(level.hasOwnProperty('exists') && !level.exists){
         if(this.isLoggedIn == false){
-          this.$router.push('/account/login');
+          this.router_push('/account/login');
         } else if(this.$store.state.isLoggedIn == true){
-          this.$router.push('/404');
+          this.router_push('/404');
         }
       }
 
@@ -561,9 +561,9 @@ export default {
     isLoggedIn: function(isLoggedIn) {
 
       if(isLoggedIn == false){
-        this.$router.push('/account/login');
+        this.router_push('/account/login');
       } else if(this.level!==null && this.level.hasOwnProperty('exists') && !this.level.exists){
-        this.$router.push('/404');
+        this.router_push('/404');
       }
 
     }
@@ -840,6 +840,7 @@ export default {
 
           });;
         }
+        console.log("loaded solutions");
         this.loading_solutions = false;
       });
 
@@ -1185,8 +1186,8 @@ export default {
 
     this.save_timer = setInterval(() => {
       if (!this.saved_draft) {
-        //Autosave?
-        //this.save_draft();
+        //Autosave
+        this.save_draft();
       }
     }, 20000);
 
@@ -1717,6 +1718,7 @@ p {
         border-radius: 50%;
         margin: 0 auto 10px;
         display: block;
+        cursor: pointer;
     }
 
     .downvote,

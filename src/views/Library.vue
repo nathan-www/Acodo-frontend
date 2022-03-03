@@ -12,7 +12,7 @@
           <div v-if="$store.state.isLoggedIn !== null && $store.state.isLoggedIn">
             <h2>Good
               <span v-if="(new Date()).getHours() < 12">morning</span>
-              <span v-if="(new Date()).getHours() < 17">afternoon</span>
+              <span v-else-if="(new Date()).getHours() < 17">afternoon</span>
               <span v-else>evening</span>, {{ (account.username[0].toUpperCase() + account.username.substring(1)) }}.</h2>
           </div>
 
@@ -32,7 +32,7 @@
 
     <div class="flex course-cards" v-if="loadedCourses">
 
-      <div class="course-card" v-for="course in $store.state.courses.courses" @click="$router.push('/courses/'+course.course_slug)">
+      <div class="course-card" v-for="course in $store.state.courses.courses" @click="router_push('/courses/'+course.course_slug)">
         <div class="thumbnail">
           <div class="thumbnail-inner">
 

@@ -1,26 +1,24 @@
 <template>
-
-
 <div class="nav flex">
 
   <div class="nav-left flex">
 
-    <div class="logo flex">
+    <div class="logo flex" @click="router_push('/my-courses')">
       <div class="v-center logo-icon">
         <ion-icon name="code"></ion-icon>
       </div>
       <div class="v-center logo-text">Acodo</div>
     </div>
 
-    <div @click="$router.push('/library')" :class="'nav-link v-center ' + ((getPath()=='/library')?'active':'')">
-      Library
-    </div>
-
-    <div @click="$router.push('/my-courses')" :class="'nav-link v-center ' + ((getPath()=='/my-courses')?'active':'')">
+    <div @click="router_push('/my-courses')" :class="'nav-link v-center ' + ((getPath()=='/my-courses')?'active':'')">
       My courses
     </div>
 
-    <div @click="$router.push('/leaderboards')" :class="'nav-link v-center ' + ((getPath()=='/leaderboards')?'active':'')">
+    <div @click="router_push('/library')" :class="'nav-link v-center ' + ((getPath()=='/library')?'active':'')">
+      Library
+    </div>
+
+    <div @click="router_push('/leaderboards')" :class="'nav-link v-center ' + ((getPath()=='/leaderboards')?'active':'')">
       Leaderboards
     </div>
 
@@ -38,29 +36,49 @@
 
   <div class="nav-right flex">
 
-    <div class="notification-button v-center" @click="showNotifications = true" v-click-outside="(function(){ showNotifications = false; })">
+    <div class="notification-button v-center" @click="if(!showNotifications){ getNotifications(); } showNotifications = true" v-click-outside="(function(){ showNotifications = false; })">
       <div class="inner">
-        <div class="unread-dot"></div>
+        <div class="unread-dot" v-if="unreadNotificationCount > 0"></div>
         <ion-icon name="notifications"></ion-icon>
       </div>
 
       <div class="notification-dropdown" v-if="showNotifications">
-        <div class="notification">
 
-          <div class="flex">
-            <div class="v-center">
-              <h3><span class="callout">johndoe</span> replied to your message</h3>
-            </div>
-            <div class="v-center" style="margin-left: auto;">
-              <div class="notification-time">11:35</div>
-            </div>
-          </div>
-
-          <p>I think it would be better to use a global variable rather than passing as a par...</p>
-          <p class="notification-reference">Python<span class="reference-divider">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </span>3D Arrays</p>
+        <div v-if="loadingNotifications" class="notificationPlaceholder v-center">
+          <img class="inline-loader" src="@/assets/img/loader-grey.png" alt="">
         </div>
+
+        <div v-else-if="notifications.length == 0" class="notificationPlaceholder v-center">
+          <p>You don't have any notifications</p>
+        </div>
+
+        <template v-else>
+
+          <template v-for="notification in notifications">
+            <div class="notification" v-if="notification.notification_data.type == 'reply'" @click="router_push(notification.notification_data.link_url)">
+
+              <div class="flex">
+                <div class="v-center">
+                  <div class="flex">
+                    <div class="v-center">
+                      <div class="notification-unread-dot" v-if="!notification.has_read"></div>
+                    </div>
+                    <h3 v-html="notification.notification_data.title"></h3>
+                  </div>
+                </div>
+                <div class="v-center" style="margin-left: auto;">
+                  <div class="notification-time">{{ ConvertTime(notification.timestamp,"semi-absolute") }}</div>
+                </div>
+              </div>
+
+              <p>{{ notification.notification_data.subtitle }}</p>
+              <p class="notification-reference" v-html="notification.notification_data.link_text.replace('>','<span class=\'reference-divider\'><ion-icon name=\'chevron-forward-outline\'></ion-icon></span>')"></p>
+
+            </div>
+          </template>
+
+        </template>
+
       </div>
 
     </div>
@@ -71,7 +89,7 @@
     </div>
 
     <div class="v-center" style="margin-left: 25px;" v-if="$store.state.isLoggedIn == false">
-      <div class="btn btn-primary" @click="$router.push('/account/login')">
+      <div class="btn btn-primary" @click="router_push('/account/login')">
         Login or Register
       </div>
     </div>
@@ -96,11 +114,11 @@
 
           <div class="flex">
 
-            <img class="dropdown-profile-pic" :src="'https://robohash.org/'+MD5(account.username)+'.png'" alt="">
+            <img class="dropdown-profile-pic" :src="'https://robohash.org/'+MD5(account.username)+'.png'" @click="router_push('/@/'+account.username)" alt="">
 
             <div>
 
-              <h3>{{account.username}} <span class="rank-badge">{{ getRank(account.xp)['currentRank'] }}</span></h3>
+              <h3><span @click="router_push('/@/'+account.username)">{{account.username}}</span> <span class="rank-badge">{{ getRank(account.xp)['currentRank'] }}</span></h3>
 
               <div class="account-dropdown-stats flex" v-if="profile !== null">
 
@@ -147,7 +165,7 @@
 
         <div class="account-dropdown-links">
 
-          <div class="dropdown-link flex" @click="$router.push('/my-courses')">
+          <div class="dropdown-link flex" @click="router_push('/my-courses')">
             <div class="icon v-center">
               <ion-icon name="apps"></ion-icon>
             </div>
@@ -156,7 +174,7 @@
             </div>
           </div>
 
-          <div class="dropdown-link flex" @click="$router.push('/@/'+username)">
+          <div class="dropdown-link flex" @click="router_push('/@/'+username)">
             <div class="icon v-center">
               <ion-icon name="person"></ion-icon>
             </div>
@@ -165,7 +183,7 @@
             </div>
           </div>
 
-          <div class="dropdown-link flex" @click="$router.push('/settings')">
+          <div class="dropdown-link flex" @click="router_push('/settings')">
             <div class="icon v-center">
               <ion-icon name="cog"></ion-icon>
             </div>
@@ -176,7 +194,7 @@
 
           <div class="dropdown-divider"></div>
 
-          <div class="dropdown-link flex">
+          <div class="dropdown-link flex" @click="logout()">
             <div class="icon v-center">
               <ion-icon name="log-out-outline"></ion-icon>
             </div>
@@ -234,34 +252,67 @@ export default {
     return {
       showAccountDropdown: false,
       showNotifications: false,
+
+      notificationPoll: null,
+      unreadNotificationCount: 0,
+      notifications: [],
+      loadingNotifications: true
+
     }
   },
   methods: {
+
+    getNotifications() {
+      this.loadingNotifications = true;
+      this.api_request('GET', '/list-notifications').then((response) => {
+        if (response.status == 'success') {
+          this.loadingNotifications = false;
+          this.notifications = Object.values(response.notifications);
+        }
+      })
+    },
+
+    logout() {
+      this.api_request("POST", "/account/logout").then((resp) => {
+        if (resp.status == "success") {
+          this.router_push('/account/login');
+        }
+      })
+    },
+
+    getNotificationCount() {
+      this.api_request('GET', '/unread-notifications').then((response) => {
+        if (response.status == 'success') {
+          this.unreadNotificationCount = response.count;
+        }
+      })
+    },
+
     getPath() {
       return location.pathname;
     },
     MD5(txt) {
       return MD5(txt);
     },
-    getRank(xp){
+    getRank(xp) {
 
-        let ranks = [0,20,50,100,150,200,250,300,350,500,1000,10000];
+      let ranks = [0, 20, 50, 100, 150, 200, 250, 300, 350, 500, 1000, 10000];
 
-        let currentRank = 0;
+      let currentRank = 0;
 
-        ranks.forEach((rank, i) => {
-          if(xp >= rank){
-            currentRank = i;
-          }
-        });
-
-        currentRank += 1;
-
-        return {
-          "currentRank": "Level " + currentRank,
-          "nextRank": "Level " + (currentRank + 1),
-          'nextRankVal': ranks[currentRank]
+      ranks.forEach((rank, i) => {
+        if (xp >= rank) {
+          currentRank = i;
         }
+      });
+
+      currentRank += 1;
+
+      return {
+        "currentRank": "Level " + currentRank,
+        "nextRank": "Level " + (currentRank + 1),
+        'nextRankVal': ranks[currentRank]
+      }
 
 
     }
@@ -278,13 +329,24 @@ export default {
   mounted() {
     this.$store.dispatch('getAccount', {})
 
+
+
     if (this.isLoggedIn !== null && this.isLoggedIn) {
       this.$store.dispatch('getProfile', {
         'username': this.account.username
       });
     }
 
+    this.notificationPoll = setInterval(() => {
+      this.getNotificationCount();
+    }, 6000)
+
+  },
+
+  beforeUnmount() {
+    clearInterval(this.notificationPoll);
   }
+
 }
 </script>
 
@@ -326,6 +388,8 @@ export default {
         font-weight: 600;
         font-size: 20px;
     }
+
+    cursor: pointer;
 }
 
 .nav-link {
@@ -557,6 +621,15 @@ export default {
     transform: translateY(100%);
     z-index: 20;
 
+    max-height: 400px;
+    overflow-y: scroll;
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
     .notification {
 
         min-width: 320px;
@@ -572,15 +645,16 @@ export default {
             background-color: #f8f8fa;
         }
 
-        h3 {
+        h3::v-deep {
             font-size: 13px;
             font-weight: 400;
             color: #5F6266;
             white-space: nowrap;
             position: relative;
 
-            .callout {
+            b {
                 color: #151538;
+                font-weight: 400;
             }
         }
 
@@ -596,7 +670,7 @@ export default {
             font-size: 10px;
         }
 
-        p.notification-reference {
+        p.notification-reference::v-deep {
             color: #A0A1A7;
             font-weight: 400;
             margin-top: 10px;
@@ -608,5 +682,30 @@ export default {
             }
         }
     }
+}
+
+.notificationPlaceholder {
+    width: 320px;
+    height: 50px;
+
+    color: #5F6266;
+    font-size: 13px;
+
+    p {
+        width: 320px;
+        text-align: center;
+    }
+
+    img {
+        margin: 0 auto;
+    }
+}
+
+.notification-unread-dot {
+    background-color: #005FFE;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 5px;
 }
 </style>

@@ -174,6 +174,10 @@ const mutations = {
   SET_ACCOUNT(state, account) {
     if (account.status == "success") {
       state.isLoggedIn = true;
+      account.sessions = account.sessions.map((s) => {
+        s.last_active_relative = ConvertTime(s.last_active, 'relative');
+        return s;
+      });
       state.account = account;
     } else {
       state.isLoggedIn = false;

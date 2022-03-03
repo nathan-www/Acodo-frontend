@@ -6,7 +6,7 @@
   <h1>404 Not Found</h1>
   <h2>Sorry, the page you are looking for does not exist or is not available</h2>
 
-  <div class="btn btn-primary" @click="$router.push('/')"><ion-icon name="arrow-back" class="betterIcon"></ion-icon>&nbsp; Back to home</div>
+  <div class="btn btn-primary" @click="router_push('/')"><ion-icon name="arrow-back" class="betterIcon"></ion-icon>&nbsp; Back to home</div>
 </div>
 
 </template>

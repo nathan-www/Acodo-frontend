@@ -194,7 +194,7 @@
 
         <div class="flex course-cards">
 
-          <div class="course-card" v-for="course in profile.courses" @click="$router.push('/courses/'+course.course_slug)">
+          <div class="course-card" v-for="course in profile.courses" @click="router_push('/courses/'+course.course_slug)">
             <div class="thumbnail">
               <div class="thumbnail-inner">
                 <div class="v-center v-100">
@@ -274,7 +274,7 @@
             <div class="solution-info">
               <div class="breadcrumb flex">
                 <div class="v-center">
-                  <a @click="$router.push('/courses/'+s.course_slug)">{{ s.course_title  }}</a>
+                  <a @click="router_push('/courses/'+s.course_slug)">{{ s.course_title  }}</a>
                 </div>
                 <div class="v-center">
                   <span class="separator">
@@ -282,10 +282,10 @@
                   </span>
                 </div>
                 <div class="v-center">
-                  <a @click="$router.push('/courses/'+s.course_slug+'/'+s.chapter_slug)">{{ s.chapter_title  }}</a>
+                  <a @click="router_push('/courses/'+s.course_slug+'/'+s.chapter_slug)">{{ s.chapter_title  }}</a>
                 </div>
               </div>
-              <h2 @click="$router.push('/courses/'+s.course_slug+'/'+s.chapter_slug+'/'+s.level_slug)">{{ s.level_title }}</h2>
+              <h2 @click="router_push('/courses/'+s.course_slug+'/'+s.chapter_slug+'/'+s.level_slug)">{{ s.level_title }}</h2>
             </div>
           </div>
 
@@ -400,7 +400,7 @@ export default {
     nonexistent_profiles: function(nonexistent_profiles){
       console.log("warch");
       if(nonexistent_profiles.hasOwnProperty(this.username)){
-        this.$router.push('/404');
+        this.router_push('/404');
       }
     }
   },
@@ -418,7 +418,7 @@ export default {
     });
 
     if(this.nonexistent_profiles.hasOwnProperty(this.username)){
-      this.$router.push('/404');
+      this.router_push('/404');
     }
   }
 }

@@ -1,7 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory
+} from 'vue-router'
 
-const routes = [
-  {
+const routes = [{
     path: '/library',
     name: 'Library',
     component: () => import('../views/Library.vue')
@@ -17,6 +19,11 @@ const routes = [
     component: () => import('../views/Settings.vue')
   },
   {
+    path: '/leaderboards',
+    name: 'Leaderboards',
+    component: () => import('../views/Leaderboards.vue')
+  },
+  {
     path: '/account/:path(login|register|forgot-password|verify-email|verify|reset-password)',
     name: 'Login',
     component: () => import('../views/Login.vue')
@@ -28,7 +35,7 @@ const routes = [
   },
   {
     path: '/courses/:course_slug',
-    alias:'/courses/:course_slug/:chapter_slug',
+    alias: '/courses/:course_slug/:chapter_slug',
     name: 'Course',
     component: () => import('../views/Course.vue')
   },

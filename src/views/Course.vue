@@ -35,7 +35,7 @@
         <div class="course-properties">
           <p><span class="key">Languages: </span> <span class="value">{{ course.languages.join(", ") }}</span></p>
           <p><span class="key">Difficulty: </span> <span class="value">{{ course.difficulty }}</span></p>
-          <p><span class="key">Authors: </span><span class="value"><a v-for="author in course.authors" @click="$router.push('/@/'+author.username)">{{author.username}}</a></span></p>
+          <p><span class="key">Authors: </span><span class="value"><a v-for="author in course.authors" @click="router_push('/@/'+author.username)">{{author.username}}</a></span></p>
         </div>
 
         <div class="card-bottom flex">
@@ -132,16 +132,28 @@
 
         <p class="level-count">{{Object.values(chapter.levels).length}} level{{ (Object.values(chapter.levels).length==1)?"":"s" }}</p>
 
-        <div class="level-card flex" v-for="level in Object.values(chapter.levels)" @click="$router.push('/courses/'+course_slug+'/'+chapter.chapter_slug+'/'+level.level_slug)">
+        <div class="level-card flex" v-for="level in Object.values(chapter.levels)" @click="router_push('/courses/'+course_slug+'/'+chapter.chapter_slug+'/'+level.level_slug)">
           <div class="v-center">
             <div :class="'level-icon v-center ' + (level.complete?'complete':'')">
               <ion-icon name="checkmark-outline"></ion-icon>
             </div>
           </div>
-          <div class="v-center">
-            <div class="level-text">
-              {{ level.level_title }}
+          <div class="v-center w100">
+
+            <div class="level-text w100 flex">
+
+              <div class="v-center">
+                {{ level.level_title }}
+              </div>
+
+              <div class="v-center auto-left">
+                <span class="difficulty-text easy" v-if="level.difficulty.toLowerCase() == 'easy'">Easy</span>
+                <span class="difficulty-text medium" v-if="level.difficulty.toLowerCase() == 'medium'">Medium</span>
+                <span class="difficulty-text hard" v-if="level.difficulty.toLowerCase() == 'hard'">Hard</span>
+              </div>
+
             </div>
+
           </div>
           <div class="v-center right-arrow">
             <ion-icon name="arrow-forward-outline"></ion-icon>
@@ -193,7 +205,7 @@ export default {
     enroll() {
 
       if (this.account == null) {
-        this.$router.push('/account/login');
+        this.router_push('/account/login');
       } else {
         this.api_request('POST', '/courses/' + this.course_slug + '/enroll').then(() => {
           this.$store.dispatch('getCourse', {
@@ -225,11 +237,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-p.desc{
-  margin-right: 35px;
+p.desc {
+    margin-right: 35px;
 }
-
 
 h1 {
     color: #151538;
@@ -256,10 +266,10 @@ p {
     color: #5F6266;
 }
 
-.progress-text{
-  padding: 10px;
-  font-size: 14px;
-  color: #6FCF97;
+.progress-text {
+    padding: 10px;
+    font-size: 14px;
+    color: #6FCF97;
 }
 
 .main {
@@ -512,6 +522,28 @@ p {
         img {
             height: 180px;
         }
+    }
+}
+
+.difficulty-text {
+    font-size: 12px;
+    padding: 3px 5px;
+    border-radius: 3px;
+    margin-right: 10px;
+
+    &.easy{
+      color: #6FCF97;
+      background-color: rgba(#6FCF97,0.17);
+    }
+
+    &.medium{
+      color: #F2C94C;
+      background-color: rgba(#F2C94C,0.17);
+    }
+
+    &.hard{
+      color: #E45649;
+      background-color: rgba(#E45649,0.17);
     }
 }
 </style>

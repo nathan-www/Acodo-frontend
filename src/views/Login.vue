@@ -20,7 +20,7 @@
         <h4>New to Acodo?</h4>
       </div>
       <div class="v-center">
-        <div @click="$router.push('/account/register')" class="btn btn-grey">Create an account</div>
+        <div @click="router_push('/account/register')" class="btn btn-grey">Create an account</div>
       </div>
     </div>
 
@@ -54,7 +54,7 @@
           <div @click="if(!login_loading){ login(); }" class="btn btn-primary btn-lg">Login <img v-if="login_loading" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
         </div>
 
-        <a class="forgot-password" @click="$router.push('/account/forgot-password')">Forgot password</a>
+        <a class="forgot-password" @click="router_push('/account/forgot-password')">Forgot password</a>
 
       </div>
     </div>
@@ -117,28 +117,12 @@
               <div class="btn btn-primary btn-lg" @click="if(!register_loading){ register(); }">Create account <img v-if="register_loading" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
             </div>
 
-            <a class="forgot-password" @click="$router.push('/account/login')">I already have an account</a>
+            <a class="forgot-password" @click="router_push('/account/login')">I already have an account</a>
 
           </div>
 
           <div>
-            <div class="password-criteria" v-if="register_password.length > 0">
-              <p>Password must contain:</p>
-              <p class="criterion success" v-if="register_password.length >= 8">
-                <ion-icon class="betterIcon" name="checkmark"></ion-icon> At least 8 characters
-              </p>
-              <p class="criterion" v-else>At least 8 characters</p>
-
-              <p class="criterion success" v-if="register_password.match(/[A-Za-z]/) !== null">
-                <ion-icon class="betterIcon" name="checkmark"></ion-icon> At least 1 letter
-              </p>
-              <p class="criterion" v-else>At least 1 letter</p>
-
-              <p class="criterion success" v-if="register_password.match(/[0-9]/) !== null">
-                <ion-icon class="betterIcon" name="checkmark"></ion-icon> At least 1 number
-              </p>
-              <p class="criterion" v-else>At least 1 number</p>
-            </div>
+            <PasswordChecker :password="register_password"></PasswordChecker>
           </div>
 
         </div>
@@ -174,7 +158,7 @@
           <div @click="if(!loading_password_reset){requestPasswordReset();}" class="btn btn-primary btn-lg">Send me a password reset <img v-if="loading_password_reset" class="inline-loader betterIcon" src="@/assets/img/loader-white.png" alt=""></div>
         </div>
 
-        <a class="forgot-password" @click="$router.push('/account/login')">I've remembered my login</a>
+        <a class="forgot-password" @click="router_push('/account/login')">I've remembered my login</a>
 
       </div>
     </div>
@@ -269,23 +253,7 @@
           </div>
 
           <div>
-            <div class="password-criteria" v-if="reset_password.length > 0">
-              <p>Password must contain:</p>
-              <p class="criterion success" v-if="reset_password.length >= 8">
-                <ion-icon class="betterIcon" name="checkmark"></ion-icon> At least 8 characters
-              </p>
-              <p class="criterion" v-else>At least 8 characters</p>
-
-              <p class="criterion success" v-if="reset_password.match(/[A-Za-z]/) !== null">
-                <ion-icon class="betterIcon" name="checkmark"></ion-icon> At least 1 letter
-              </p>
-              <p class="criterion" v-else>At least 1 letter</p>
-
-              <p class="criterion success" v-if="reset_password.match(/[0-9]/) !== null">
-                <ion-icon class="betterIcon" name="checkmark"></ion-icon> At least 1 number
-              </p>
-              <p class="criterion" v-else>At least 1 number</p>
-            </div>
+            <PasswordChecker :password="reset_password"></PasswordChecker>
           </div>
 
         </div>
@@ -299,9 +267,13 @@
 </template>
 
 <script>
+import PasswordChecker from '@/components/PasswordChecker.vue'
+
 export default {
   name: 'Login',
-  components: {},
+  components: {
+    PasswordChecker
+  },
   data() {
     return {
       login_identifier: "",
@@ -344,6 +316,8 @@ export default {
 
     login() {
       this.login_loading = true;
+      this.login_error = null;
+
       this.api_request('POST', '/account/login', {
         'identifier': this.login_identifier,
         'password': this.login_password,
@@ -354,11 +328,12 @@ export default {
         if (resp.status == 'fail') {
           this.login_error = resp.error_message;
           if (resp.hasOwnProperty('email_verify') && resp.email_verify) {
-            this.$router.push('/account/verify-email?email=' + this.login_identifier);
+            this.router_push('/account/verify-email?email=' + this.login_identifier);
           }
         } else {
           this.login_error = null;
-          this.$router.push('/dashboard');
+          this.$store.dispatch('getAccount', true);
+          this.router_push('/my-courses');
         }
       });
     },
@@ -376,6 +351,8 @@ export default {
       } else {
 
         this.register_loading = true;
+        this.register_error = null;
+
         this.api_request('POST', '/account/register', {
           'username': this.register_username,
           'email': this.register_email,
@@ -387,7 +364,7 @@ export default {
             this.register_error = resp.error_message;
           } else {
             this.register_error = null;
-            this.$router.push('/account/verify-email?email=' + this.register_email)
+            this.router_push('/account/verify-email?email=' + this.register_email)
           }
         })
       }
@@ -427,7 +404,7 @@ export default {
           if (resp.status == "fail") {
             this.reset_password_error = resp.error_message;
           } else {
-            this.$router.push('/account/login?reset=true');
+            this.router_push('/account/login?reset=true');
           }
         });
       }
@@ -474,7 +451,7 @@ export default {
         if (resp.status == "fail") {
           this.verification_error = true;
         } else {
-          this.$router.push('/account/login?verified=true');
+          this.router_push('/account/login?verified=true');
         }
       });
     }
@@ -614,29 +591,6 @@ b.blue {
 
 .success-message {
     background-color: #6FCF97;
-}
-
-.password-criteria {
-
-    background-color: #F8F8FA;
-    margin-left: 20px;
-    padding: 15px 25px;
-    border-radius: 5px;
-    --ionicon-stroke-width: 48px;
-
-    p:not(.criterion) {
-        margin: 0 0 5px;
-    }
-
-    p.criterion {
-        color: #EC4747;
-        margin: 0 0 3px;
-
-        &.success {
-            color: #6FCF97;
-        }
-    }
-
 }
 
 .usernameStatus {

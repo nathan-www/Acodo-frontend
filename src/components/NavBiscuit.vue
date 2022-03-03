@@ -16,7 +16,7 @@
 
   <div class="biscuit-dropdown-area" v-click-outside="function(){ showDropdown=false; }" v-if="showDropdown">
 
-    <div v-for="item in items" :class="'dropdown-item ' + (item.active ? 'active':'')" @click="$router.push(item.link)">
+    <div v-for="item in items" :class="'dropdown-item ' + (item.active ? 'active':'')" @click="router_push(item.link)">
       <div class="flex">
         <div class="v-center">
           <div :class="'dropdown-icon v-center ' + (item.levels_done==item.levels_total ? 'check':'')">
