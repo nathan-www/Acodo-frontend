@@ -505,7 +505,7 @@ export default {
         theme: "acodo",
         lineNumbers: true,
         smartIndent: true,
-        indentUnit: 2,
+        indentUnit: 4,
         foldGutter: true,
         styleActiveLine: true,
       },
@@ -1209,12 +1209,12 @@ export default {
         color: #005FFE;
     }
 
-    h2 {
-        color: #151538;
-        font-size: 18px;
+    img{
+      max-width: 100%;
+      border-radius: 5px;
     }
 
-    h3 {
+    h1,h2,h3 {
         color: #151538;
         font-size: 15px;
         margin-bottom: 5px;
@@ -1230,10 +1230,11 @@ export default {
 
 }
 
+
 .brief,
 .message-content,
 .test-area {
-    .inline-code {
+    .inline-code, code:not(pre code) {
         font-family: 'Source Code Pro', monospace;
         font-size: 14px;
         color: #5C616B;
@@ -1242,7 +1243,7 @@ export default {
         padding: 1px 5px;
         border-radius: 5px;
     }
-    .code-block {
+    .code-block, pre {
         font-family: 'Source Code Pro', monospace;
         font-size: 14px;
         color: #5C616B;
@@ -1517,6 +1518,7 @@ p {
     display: block;
     margin-left: 8px;
     user-select: none;
+    text-transform: capitalize;
 
     &.easy {
         color: #6FCF97;

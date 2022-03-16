@@ -4,6 +4,17 @@ export function MarkdownCoverter(markdown) {
     return "";
   }
 
+  var showdown = require('showdown');
+  showdown.setFlavor('github');
+  var converter = new showdown.Converter();
+  return converter.makeHtml(markdown);
+
+
+  /*
+  OLD CODE IGNORE BELOW
+  */
+
+
   function HTMLentities(r) {
     return r.replace(/[\x26\x0A\<>'"]/g, function(r) {
       return "&#" + r.charCodeAt(0) + ";"
@@ -16,22 +27,22 @@ export function MarkdownCoverter(markdown) {
     str = str.replaceAll(/\*(.+?)\*/g, (r) => "<i>" + r.slice(1, -1) + "</i>");
     str = str.replaceAll(/_(.+?)_/g, (r) => "<i>" + r.slice(1, -1) + "</i>");
     str = str.replaceAll(/`(.+?)`/g, (r) => "<span class='inline-code'>" + r.slice(1, -1) + "</span>");
-    str = str.replaceAll(/\[(.*?)\]\((.*?)\)/g,(link) => {
+    str = str.replaceAll(/\[(.*?)\]\((.*?)\)/g, (link) => {
       let text = link.match(/\[(.*?)\]/)[1];
       let url = link.match(/\((.*?)\)/)[1];
 
-      if(url.match(/^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)$/) == null){
+      if (url.match(/^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)$/) == null) {
         return "[Invalid URL]";
       }
 
       return '<a href="' + url + '" target="_blank" rel="nofollow">' + text + '</a>';
     });
-    str = str.replaceAll(/\&\#60\;(.+?)\&\#62\;/g,(link) => {
+    str = str.replaceAll(/\&\#60\;(.+?)\&\#62\;/g, (link) => {
 
-      if(link.slice(5,-5).match(/^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)$/) == null){
+      if (link.slice(5, -5).match(/^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)$/) == null) {
         return link;
       }
-      return '<a href="' + link.slice(5,-5) + '" target="_blank" rel="nofollow">' + link.slice(5,-5) + '</a>';
+      return '<a href="' + link.slice(5, -5) + '" target="_blank" rel="nofollow">' + link.slice(5, -5) + '</a>';
     });
     return str;
   }
@@ -41,8 +52,8 @@ export function MarkdownCoverter(markdown) {
 
   let elements = lines.reduce((prev, curr, index, arr) => {
 
-    if(curr.match(/^[\*]{3,}$/) !== null || curr.match(/^[_]{3,}$/) !== null){
-        return [].concat(prev,["<div class='horizotal-rule'></div>"]);
+    if (curr.match(/^[\*]{3,}$/) !== null || curr.match(/^[_]{3,}$/) !== null) {
+      return [].concat(prev, ["<div class='horizotal-rule'></div>"]);
     }
 
     if (curr.startsWith("\t") || curr.startsWith("    ")) {
@@ -81,4 +92,5 @@ export function MarkdownCoverter(markdown) {
 
 
   return elements.join("");
+
 }
