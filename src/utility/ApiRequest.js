@@ -1,6 +1,6 @@
 export async function api_request(method, endpoint, json = {}, delay = 0) {
 
-  let api_url = "http://localhost:8888";
+  let api_url = "/api";
 
   if (method == "POST") {
     var resp = await fetch(api_url + endpoint, {
