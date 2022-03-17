@@ -36,7 +36,7 @@
 
   <div class="nav-right flex">
 
-    <div class="notification-button v-center" @click="if(!showNotifications){ getNotifications(); } showNotifications = true" v-click-outside="(function(){ showNotifications = false; })">
+    <div v-if="$store.state.isLoggedIn" class="notification-button v-center" @click="if(!showNotifications){ getNotifications(); } showNotifications = true" v-click-outside="(function(){ showNotifications = false; })">
       <div class="inner">
         <div class="unread-dot" v-if="unreadNotificationCount > 0"></div>
         <ion-icon name="notifications"></ion-icon>
