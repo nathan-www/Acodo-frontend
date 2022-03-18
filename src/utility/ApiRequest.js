@@ -3,9 +3,9 @@ export async function api_request(method, endpoint, json = {}, delay = 0) {
   let existing_cookie = document.cookie.match(/acodo_csrf_token=(.*)/);
 
   if (existing_cookie !== null) {
-    let csrf_token = existing_cookie[1];
+    var csrf_token = existing_cookie[1];
   } else {
-    let csrf_token = Math.random().toString(16).substr(2, 10) + Math.random().toString(16).substr(2, 10);
+    var csrf_token = Math.random().toString(16).substr(2, 10) + Math.random().toString(16).substr(2, 10);
     let d = new Date();
     d.setTime(d.getTime() + (3 * 60 * 1000));
     document.cookie = "acodo_csrf_token="+csrf_token+";expires="+d.toUTCString()+";path=/";
