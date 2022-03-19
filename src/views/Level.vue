@@ -1,5 +1,4 @@
 <template>
-
 <Navbar>
   <template v-slot:biscuits>
 
@@ -80,6 +79,14 @@
           </div>
           <div class="v-center">
             <span :class="'difficulty-badge ' + level.difficulty.toLowerCase()">{{level.difficulty}}</span>
+          </div>
+          <div class="v-center xp-badge">
+            <div class="flex">
+              <div class="v-center icon">
+                <ion-icon name="sparkles"></ion-icon>
+              </div>
+              <div class="v-center">{{level.xp}} xp</div>
+            </div>
           </div>
         </div>
 
@@ -547,10 +554,10 @@ export default {
   watch: {
     level: function(level) {
 
-      if(level.hasOwnProperty('exists') && !level.exists){
-        if(this.isLoggedIn == false){
+      if (level.hasOwnProperty('exists') && !level.exists) {
+        if (this.isLoggedIn == false) {
           this.router_push('/account/login');
-        } else if(this.$store.state.isLoggedIn == true){
+        } else if (this.$store.state.isLoggedIn == true) {
           this.router_push('/404');
         }
       }
@@ -560,9 +567,9 @@ export default {
     },
     isLoggedIn: function(isLoggedIn) {
 
-      if(isLoggedIn == false){
+      if (isLoggedIn == false) {
         this.router_push('/account/login');
-      } else if(this.level!==null && this.level.hasOwnProperty('exists') && !this.level.exists){
+      } else if (this.level !== null && this.level.hasOwnProperty('exists') && !this.level.exists) {
         this.router_push('/404');
       }
 
@@ -1209,12 +1216,14 @@ export default {
         color: #005FFE;
     }
 
-    img{
-      max-width: 100%;
-      border-radius: 5px;
+    img {
+        max-width: 100%;
+        border-radius: 5px;
     }
 
-    h1,h2,h3 {
+    h1,
+    h2,
+    h3 {
         color: #151538;
         font-size: 15px;
         margin-bottom: 5px;
@@ -1230,11 +1239,11 @@ export default {
 
 }
 
-
 .brief,
 .message-content,
 .test-area {
-    .inline-code, code:not(pre code) {
+    .inline-code,
+    code:not(pre code) {
         font-family: 'Source Code Pro', monospace;
         font-size: 14px;
         color: #5C616B;
@@ -1243,7 +1252,8 @@ export default {
         padding: 1px 5px;
         border-radius: 5px;
     }
-    .code-block, pre {
+    .code-block,
+    pre {
         font-family: 'Source Code Pro', monospace;
         font-size: 14px;
         color: #5C616B;
@@ -1285,6 +1295,16 @@ div.test-area span.inline-code {
 
     ion-icon {
         margin-right: 2px;
+    }
+}
+
+.xp-badge {
+    color: #F2C94C;
+    font-size: 13px;
+    margin-left: auto;
+
+    .icon{
+      margin-right: 2px;
     }
 }
 
