@@ -264,7 +264,7 @@
       </div>
 
 
-      <div class="send-box" @keyup="(() => {  if(!this.sending_message && keysDown.includes(13) && (keysDown.includes(17) || keysDown.includes(224))){ sendMessage(); } })()">
+      <div class="send-box" @keyup="(() => {  if(!this.sending_message && keysDown.includes(13) && (keysDown.includes(17) || keysDown.includes(224))){    if(!sending_message && editing_message !== null){ submit_edit(); } else { sendMessage(); } } })()">
 
         <div class="reply-to-banner" v-if="reply_to !== null">
           Replying to @{{reply_to.user.username}}
@@ -1731,6 +1731,7 @@ p {
         font-size: 13px;
         font-weight: 400;
         margin-top: 5px;
+        word-wrap: anywhere;
     }
 
     .profile-pic {

@@ -1,6 +1,6 @@
 export async function api_request(method, endpoint, json = {}, delay = 0) {
 
-  let existing_cookie = document.cookie.match(/acodo_csrf_token=(.*)/);
+  let existing_cookie = document.cookie.match(/acodo_csrf_token=(.*?)(;|$)/);
 
   if (existing_cookie !== null) {
     var csrf_token = existing_cookie[1];
