@@ -264,8 +264,7 @@
       </div>
 
 
-      <div class="send-box" @keyup="(() => {  if(!this.sending_message && keysDown.includes(13) && (keysDown.includes(17) || keysDown.includes(224))){    if(!sending_message && editing_message !== null){ submit_edit(); } else { sendMessage(); } } })()">
-
+  <div class="send-box" @keyup="(() => {  if(!this.sending_message && keysDown.includes(13) && (keysDown.includes(17) || keysDown.includes(224))){    if(!sending_message && editing_message !== null){ submit_edit(); } else { sendMessage(); } } })()">
         <div class="reply-to-banner" v-if="reply_to !== null">
           Replying to @{{reply_to.user.username}}
           <ion-icon @click="reply_to=null" name="close-outline"></ion-icon>
@@ -279,6 +278,8 @@
 
 
         <div class="send-bar flex">
+
+
           <div data-tooltip="Inline code" data-tooltip-location="top" class="send-box-button code-button" @mousedown="$event.preventDefault()" @mouseup="$refs.messageEditor.inlinecode()">
             <ion-icon name="code-working" class="betterIcon"></ion-icon>
           </div>
