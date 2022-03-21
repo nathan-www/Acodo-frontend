@@ -37,7 +37,7 @@ var MessageHTMLToMarkdown = (html) => {
   });
 
   message = message.replaceAll(/<em>(.+?)<\/em>/g, (e) => {
-    return e.replace("<em>", "*").replace("</em>", "**");
+    return e.replace("<em>", "*").replace("</em>", "*");
   });
 
   message = message.replaceAll(/<code>(.+?)<\/code>/g, (e) => {
