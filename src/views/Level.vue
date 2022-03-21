@@ -420,7 +420,7 @@
         <div class="code-tool-bar-right flex">
 
           <div v-if="isMac" class="btn btn-primary-light" data-tooltip="⌘⇧R" @click="runCode()">
-            <ion-icon name="play-outline" class="betterIcon"></ion-icon> Run
+            <ion-icon name="play-outline" class="betterIcon"></ion-icon> Run 
           </div>
           <div v-else class="btn btn-primary-light" data-tooltip="Ctrl⇧R" @click="runCode()">
             <ion-icon name="play-outline" class="betterIcon"></ion-icon> Run
@@ -506,6 +506,8 @@ export default {
     return {
       code: "",
       loaded_code: false,
+
+      code_running: false,
 
       sidebarTab: "challenge",
       cmOptions: {
@@ -706,6 +708,7 @@ export default {
     },
 
     runCode() {
+      this.code_running = true;
       this.$refs.PythonEmulator.runCode({
         code: this.code,
         tests: this.level.unit_tests,
@@ -729,6 +732,7 @@ export default {
     receiveTestFeedback(feedback, error) {
       this.unit_testing_error = error;
       this.unit_test_output = feedback;
+      this.code_running = false;
     },
 
     SafeBase64Decode(a) {
