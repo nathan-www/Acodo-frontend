@@ -321,7 +321,7 @@ export default {
       this.api_request('POST', '/account/login', {
         'identifier': this.login_identifier,
         'password': this.login_password,
-        'recaptcha_token': '' //TODO
+        'recaptcha_token': '6Lf4pEAiAAAAAN5zvovVe7UMSVKStlMXn6Qe_PpK' //TODO
       }, 1000).then((resp) => {
 
         this.login_loading = false;
