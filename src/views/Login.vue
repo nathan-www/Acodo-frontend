@@ -40,6 +40,7 @@
 
         <div class="fail-message" v-if="login_error !== null">
           {{login_error}}
+          <a v-if="prompt_create_new_account" href="#" class="link" @click="$router.push('/account/register')">Create a new account</a>
         </div>
 
         <p>Username or email</p>
@@ -285,6 +286,7 @@ export default {
       reset_email: "",
 
       login_error: null,
+      prompt_create_new_account: false,
       login_loading: false,
       register_loading: false,
       register_error: null,
@@ -317,6 +319,7 @@ export default {
     login() {
       this.login_loading = true;
       this.login_error = null;
+      this.prompt_create_new_account = false;
 
       this.api_request('POST', '/account/login', {
         'identifier': this.login_identifier,
@@ -329,6 +332,8 @@ export default {
           this.login_error = resp.error_message;
           if (resp.hasOwnProperty('email_verify') && resp.email_verify) {
             this.router_push('/account/verify-email?email=' + this.login_identifier);
+          } else if(resp.hasOwnProperty('prompt_create_new_account')){
+            this.prompt_create_new_account = true;
           }
         } else {
           this.login_error = null;
@@ -603,5 +608,10 @@ b.blue {
     &.success {
         color: #6FCF97;
     }
+}
+
+
+a.link{
+  color: #fff;
 }
 </style>
